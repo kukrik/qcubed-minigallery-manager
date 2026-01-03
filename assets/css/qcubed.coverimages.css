@@ -1,0 +1,97 @@
+/* https://blog.logrocket.com/guide-image-overlays-css/ */
+
+/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_image_transparent_bottom
+
+ https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_blurred_bg
+
+ https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_image_overlay_title !!!!!!
+ */
+
+/* Reset */
+*, *::before, *::after { box-sizing: border-box; }
+
+.multi-images-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.choose-mini-gallery {
+    cursor: pointer;
+}
+
+.gallery-img {
+    position: absolute;
+    display: block;
+    float: left;
+    top: 0;
+    margin-top: 15px;
+    margin-left: 15px;
+    width: 100px;
+    height: auto;
+}
+
+.mini-gallery-wrapper .selected-overlay {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: auto;
+    top: 0;
+    bottom: 60px;
+    background: rgba(0, 0, 0, 0.4); /* Black see-through */
+    transition: .5s ease;
+    opacity:0;
+}
+
+.mini-gallery-wrapper:hover .selected-overlay {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.delete-overlay {
+    position: absolute;
+    display: block;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4); /* Black see-through */
+    color: #f1f1f1;
+    width: 100%;
+    transition: .5s ease;
+    opacity:0;
+    color: white;
+    font-size: 14px;
+    padding: 20px 0 10px 10px;
+}
+
+.delete-wrapper:hover .delete-overlay {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.svg-delete {
+    stroke: #ff0000;
+    stroke-width: 0.15em;
+}
+
+.files-svg {
+    display: block;
+    width: 100%;
+    height: 100%
+}
+
+.overLay-right {
+    display: block;
+    float: right;
+    margin-top: -10px;
+    width: 40px !important;
+    height: 40px;
+}
+
+.hidden {
+    display: none !important;
+}

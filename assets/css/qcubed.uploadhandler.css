@@ -1,0 +1,123 @@
+body, html {
+    background-color: #ebe7e2;
+    width: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    color: #000;
+}
+.upload-wrapper {
+    margin-top: 10px;
+}
+.dialog-upload-wrapper {
+    margin-top: 10px;
+}
+.files img {
+    object-fit: cover;
+    object-position: 100% 0;
+}
+.text-error {
+    color: #ff0000;
+}
+span.ready {}
+.progress-bar {
+    height: 6px;
+    width: 100%;
+    margin-bottom: 4px;
+    background: #e1e1e1;
+    border-radius: 30px;
+}
+.progress-bar .progress {
+    height: 100%;
+    width: 0%;
+    background: #419a41;
+    border-radius: inherit;
+    transition:width 3s linear;
+}
+.percent-bar {
+    line-height: 1.5em;
+}
+/* Customize container */
+@media (min-width: 768px) {
+    .container {
+        max-width: 730px;
+    }
+    .fileupload-buttonbar {
+        /*margin-bottom: 20px;*/
+    }
+    .fileupload-donebar {
+        display: block;
+        border-top: 1px solid #ddd;
+        margin-top: -20px;
+        padding-top: 20px;
+    }
+    .fileupload-buttonbar button {
+        margin-left: 5px;
+    }
+}
+.fileinput-button {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.fileinput-button input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    height: 100%;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    font-size: 200px !important;
+    direction: ltr;
+    cursor: pointer;
+}
+.fileinput-button.disabled,
+.fileinput-button.disabled input[type="file"]
+{
+    cursor: not-allowed !important;
+}
+
+/* Fixes for IE < 8 */
+@media screen\9 {
+    .fileinput-button input {
+        font-size: 150% !important;
+    }
+}
+.files audio,
+.files video {
+    max-width: 300px;
+}
+.files .name {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+.files button {
+    margin-bottom: 5px;
+}
+
+.alert-multi-wrapper {
+    margin-top: -10px;
+}
+
+@media (max-width: 767px) {
+    .fileupload-buttonbar .btn {
+        margin-bottom: 5px;
+    }
+    #alert_wrapper {
+        margin-top: 10px;
+    }
+    .files audio,
+    .files video {
+        max-width: 80px;
+    }
+}
+@media (max-width: 480px) {
+    .files .image td:nth-child(2) {
+        display: none;
+    }
+    #alert_wrapper {
+        margin-top: 10px;
+    }
+}

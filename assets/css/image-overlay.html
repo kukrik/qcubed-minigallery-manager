@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay</title>
+    <link href="/project/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+
+      body, html {
+          font-family: 'Open Sans', sans-serif;
+          font-size: 14px;
+          color: #000;
+      }
+
+      /* Reset */
+      *, *::before, *::after { box-sizing: border-box; }
+
+      .multi-images-container {
+          position: relative;
+          /*width: 100%;*/
+          height: 100%;
+          width: 400px;
+      }
+
+      .image {
+          display: block;
+          width: 100%;
+          height: auto;
+      }
+
+      .choose-mini-gallery {
+          cursor: pointer;
+      }
+
+      .gallery-img {
+          position: absolute;
+          display: block;
+          float: left;
+          top: 0;
+          margin-top: 15px;
+          margin-left: 15px;
+          width: 100px;
+          height: auto;
+      }
+
+      .mini-gallery-wrapper .selected-overlay {
+          position: absolute;
+          display: block;
+          width: 100%;
+          height: auto;
+          top: 0;
+          bottom: 60px;
+          background: rgba(0, 0, 0, 0.4); /* Black see-through */
+          transition: .5s ease;
+          opacity:0;
+      }
+
+     .mini-gallery-wrapper:hover .selected-overlay {
+          opacity: 1;
+          cursor: pointer;
+      }
+
+      .delete-overlay {
+          position: absolute;
+          display: block;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.4); /* Black see-through */
+          color: #f1f1f1;
+          width: 100%;
+          transition: .5s ease;
+          opacity:0;
+          color: white;
+          font-size: 14px;
+          padding: 20px 0 10px 10px;
+      }
+
+      .delete-wrapper:hover .delete-overlay {
+          opacity: 1;
+          cursor: pointer;
+      }
+
+      .svg-delete {
+          stroke: #ff0000;
+          stroke-width: 0.15em;
+      }
+
+      .files-svg {
+          display: block;
+          width: 100%;
+          height: 100%
+      }
+
+      .overLay-right {
+          display: block;
+          float: right;
+          margin-top: -10px;
+          width: 40px !important;
+          height: 40px;
+      }
+
+      .hidden {
+          display: none !important;
+      }
+
+
+
+  </style>
+
+</head>
+<body style="margin: auto 0; padding: 20px;">
+
+<h2>Multi-Image Overlay</h2>
+<p>Hover over the image to see the effect.</p>
+
+
+<div id="c234" class="multi-images-container">
+    <div class="choose-mini-gallery hidden">
+        <img src="../images/empty-multi-images-icon.png" alt="Choose a mini gallery" class="image img-responsive">
+    </div>
+
+    <div class="selected-cover-image " data-id="">
+
+        <div class="mini-gallery-wrapper" data-id="">
+            <img src="../images/ilus_vanavarav_looduses.jpg" alt="" class="image img-responsive">
+            <span class="gallery-img">
+                <svg viewBox="0 0 25 19" class="files-svg">
+                    <g fill="none" fill-rule="evenodd">
+                        <path fill="#FFF" fill-opacity=".869" d="M4 4h20v14H4z"></path>
+                        <path stroke="#0F6CA9" fill-opacity=".869" stroke-width="1.444" class="atlas-svg-white atlas-svg-stroke" d="M23.862 18H4.332c-.075 0-.137-.06-.137-.134V4.164c0-.074.062-.134.137-.134h19.53c.076 0 .138.06.138.134v13.702c0 .074-.062.134-.138.134z"></path>
+                        <path fill="#0F6CA9" d="M20.452.007H.922c-.475 0-.86.376-.86.84v13.7c0 .464.385.84.86.84h1.402v-1.41h-.818V1.417h18.36v.773h1.445V.846c0-.463-.383-.84-.857-.84zm-4.47 8.073l2.62 3.694 1.382-1.92 1.967 5.58H6.41c.047-.302.164-.745.474-1.175.956-1.345 2.93-1.41 3.273-1.426.59-.02 1.616.06 1.78.074.324.026.586.053.764.073l3.283-4.902z"></path>
+                        <ellipse cx="9.765" cy="8.886" fill="#0F6CA9" rx="1.719" ry="1.679"></ellipse>
+                    </g>
+                </svg>
+            </span>
+            <div class="selected-overlay" data-id="" data-event="edit"></div> <!-- // Eesmärk katta osaliselt pilti, jättes alumise osa kustutamise wrapperile  -->
+        </div>
+
+        <div class="delete-wrapper" data-id="" data-event="delete">
+            <div class="delete-overlay" data-id="">
+                <span class="overLay-right" aria-label="Remove association">
+                    <svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>
+                    </svg>
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

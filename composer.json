@@ -1,0 +1,16 @@
+{
+    "name": "kukrik/qcubed-minigallery-manager",
+    "description": "QCubed-4 plugin for single MiniGalleryManager component",
+    "type": "qcubed-library",
+    "keywords": ["qcubed", "minigallery-manager"],
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3"
+    },
+    "autoload": {
+      "psr-4": {"QCubed\\Plugin\\": "src/"}
+    },
+    "extra": {
+        "examples": ["minigallery_manager.php"]
+    }
+}
