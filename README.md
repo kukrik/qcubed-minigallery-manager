@@ -40,12 +40,14 @@ All validation, permission checks, confirmation dialogs, and database operations
 
 ## Database Requirements
 
-To use the MiniGallery plugin, your database must contain at least the following fields:
+The MiniGallery and FileManager plugins already provide all required database tables via their `database` directories.
+
+To integrate the MiniGallery plugin with your own content types, your content table must include at least the following columns:
 
 - `media_type_id`
 - `content_cover_media_id`
 
-In addition, the plugin expects the following tables to exist:
+In addition, the following tables are expected to exist (provided by the plugins):
 
 - `content_cover_media`
 - `mini_gallery`
@@ -70,7 +72,7 @@ It is the responsibility of the developer to implement:
 
 For a more advanced media workflow, you may also refer to:
 
-- `mediafinder.php` (from the QCubed FileManager plugin)
+- `mediafinder.php` (from the QCubed-4 FileManager plugin)
 
 ---
 
@@ -78,6 +80,7 @@ For a more advanced media workflow, you may also refer to:
 
 - **PHP 8.3 or newer**
 - **QCubed-4**
+- **QCubed FileManager plugin** (required)
 
 ---
 
@@ -89,7 +92,15 @@ This plugin is installed via Composer:
 composer require kukrik/qcubed-minigallery-manager
 ```
 
-### Optional dependencies
+### Required dependency
+
+The MiniGallery plugin depends on the QCubed-4 FileManager plugin, which must be installed or updated in your project:
+
+```bash
+composer require kukrik/qcubed-filemanager
+```
+
+### Optional but recommended dependencies
 
 ```bash
 composer require qcubed-4/plugin-bootstrap
