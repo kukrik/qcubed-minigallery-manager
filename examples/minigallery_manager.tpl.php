@@ -22,28 +22,28 @@
 </div>
 
 
-<div class="container" style="margin-top: 20px;">
+<div class="container" style="margin-top: 20px; margin-bottom: 20px;">
     <div class="row">
         <div class="col-md-9"><?= _r($this->txtEditor); ?></div>
         <div class="col-md-3"><?= _r($this->objMiniGallery); ?></div>
     </div>
-    <div class="row">
-        <div class="col-md-12" style="margin-top: 15px;"><?= _r($this->btnSubmit); ?></div>
-    </div>
-    <div class="row" style="margin-top: 20px;">
-        <div class="col-md-4">
-            <h5><b>The HTML you typed:</b></h5>
-            <?= _r($this->pnlResult); ?>
-        </div>
-        <div class="col-md-4">
-            <h5><b>DATA to store in a separate column of the database table:</b></h5>
-            <?= _r($this->pnlData); ?>
-        </div>
-        <div class="col-md-4">
-            <h5><b>The introduction videoembed is placed, for example, on top of the content on the frontend:</b></h5>
-            <?= _r($this->pnlIntroData); ?>
-        </div>
-    </div>
+<!--    <div class="row">-->
+<!--        <div class="col-md-12" style="margin-top: 15px;">--><?php //= _r($this->btnSubmit); ?><!--</div>-->
+<!--    </div>-->
+<!--    <div class="row" style="margin-top: 20px;">-->
+<!--        <div class="col-md-4">-->
+<!--            <h5><b>The HTML you typed:</b></h5>-->
+<!--            --><?php //= _r($this->pnlResult); ?>
+<!--        </div>-->
+<!--        <div class="col-md-4">-->
+<!--            <h5><b>DATA to store in a separate column of the database table:</b></h5>-->
+<!--            --><?php //= _r($this->pnlData); ?>
+<!--        </div>-->
+<!--        <div class="col-md-4">-->
+<!--            <h5><b>The introduction videoembed is placed, for example, on top of the content on the frontend:</b></h5>-->
+<!--            --><?php //= _r($this->pnlIntroData); ?>
+<!--        </div>-->
+<!--    </div>-->
 </div>
 
 <?php $this->RenderEnd(); ?>

@@ -19,11 +19,8 @@
      *                                      The IDs of the selected images are also entered into the selected table column
      *                                      in the database, along with the ID of the image group.
      * @property integer $CoverImageId Default null. In the case of a selected cover image, the id of the cover image is pushed.
+     * @property string $TempUrl Default APP_UPLOADS_TEMP_URL. The path to the temporary folder where the uploaded images are stored.
      * @property string $CoverImagePath Default null. The path of the selected cover image with the file name.
-     *
-     * @property string $SelectedVideoEmbed  Default null. For the selected video, the video embed will be pulled here.
-     * @property string $SelectedVideoAlt Default null. The recommendation is to add the following text: "Selected video"
-     *
      * @property string $RemoveAssociation Default "Remove association"
      * @property array $Items
      *
@@ -32,7 +29,10 @@
 
     class MiniGallery extends MiniGalleryGen
     {
+        /** @var null|array Items */
         protected ?array $strItems  = null;
+        /** @var string TempUrl */
+        protected string $strTempUrl = APP_UPLOADS_TEMP_URL . '/_files/thumbnail';
 
         /** @var string EmptyImagesPath */
         protected string $strEmptyImagesPath = QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/empty-multi-images-icon.png";
@@ -44,11 +44,6 @@
         protected ?int $intCoverImageId = null;
         /** @var null|string CoverImagePath */
         protected ?string $strCoverImagePath = null;
-
-        /** @var null|string SelectedVideoEmbed */
-        protected ?string $strSelectedVideoEmbed = null;
-        /** @var null|string SelectedVideoAlt */
-        protected ?string $strSelectedVideoAlt = null;
         /** @var string RemoveAssociation */
         protected string $strRemoveAssociation = "Remove association";
 
@@ -78,8 +73,9 @@
          */
         protected function registerFiles(): void
         {
+            $this->AddCssFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.coverimages.css");
             $this->AddJavascriptFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery.js");
-            $this->addCssFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.coverimages.css");
+            $this->AddJavascriptFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery-helper.js");
             $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         }
 
@@ -99,16 +95,18 @@
         }
 
         /**
-         * Generates an HTML string for displaying or hiding an image element
-         * based on the selected image ID and alternate text availability.
+         * Builds and returns the HTML string for the mini gallery UI component based on the current state.
          *
-         * @return string The generated HTML string containing the image element.
+         * The method generates a container element for the mini gallery and conditionally applies
+         * classes and attributes depending on the presence of a selected image ID and alternate text for images.
+         *
+         * @return string The generated HTML string for the mini gallery component.
          */
         protected function chooseMiniGalleryTemplate(): string
         {
             $strHtml = '';
 
-            if (!$this->intSelectedVideoId) {
+            if (!$this->intSelectedImagesId) {
                 $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 1));
             } else {
                 $strHtml .= _nl(_indent('<div class="choose-mini-gallery hidden">', 1));
@@ -126,55 +124,45 @@
         }
 
         /**
-         * Generates an HTML template for displaying the selected image, including its details and controls.
+         * Generates an HTML string for the selected mini-gallery template, including
+         * the cover image, gallery wrapper, SVG icons, and interactive overlay components.
          *
-         * The method constructs an HTML structure that visually represents a selected image
-         * along with its properties such as ID, path, and optional name and alt text.
-         * It also includes overlay controls for handling actions like deletion.
-         *
-         * @return string The generated HTML for the selected image template.
+         * @return string The generated HTML string representing the selected mini-gallery.
          */
-
         protected function selectedMiniGalleryTemplate(): string
         {
             $strHtml = '';
 
-            $strDataId = $this->intSelectedImagesId ? (string)$this->intSelectedImagesId : '';
+            $strDataId = $this->intSelectedImagesId ? (string)$this->intSelectedImagesId: '';
             $strHiddenClass = $this->intSelectedImagesId ? '' : ' hidden';
 
-            $strHtml .= _nl(_indent(
-                '<div id="' . $this->ControlId . '" class="selected-cover-image' . $strHiddenClass . '" data-id="' . $strDataId . '">',
-                1
-            ));
+            $strHtml .= _nl(_indent('<div id="' . $this->ControlId . '" class="selected-cover-image' . $strHiddenClass . '" data-id="' . $strDataId . '">',1));
 
-            $strHtml .= _nl(_indent('<div class="embed-responsive embed-responsive-16by9">', 2));
+            $strHtml .= _nl(_indent('<div class="mini-gallery-wrapper" data-id="' . $strDataId . '">', 2));
+            $strHtml .= _nl(_indent('<img src="' . $this->strCoverImagePath . '" data-id ="' . $strDataId . '" class="image selected-path img-responsive">',3));
 
-            if ($this->strSelectedVideoEmbed) {
-                $strHtml .= _nl(_indent(" $this->strSelectedVideoEmbed ", 3));
-            }
+            $strHtml .= _nl(_indent('<span class="gallery-img">',3));
+            $strHtml .= _nl(_indent('<svg viewBox="0 0 25 19" class="files-svg">',4));
+            $strHtml .= _nl(_indent('<g fill="none" fill-rule="evenodd">',5));
+            $strHtml .= _nl(_indent('<path fill="#fff" fill-opacity=".869" d="M4 4h20v14H4z"></path>',6));
+            $strHtml .= _nl(_indent(' <path stroke="#0f6ca9" fill-opacity=".869" stroke-width="1.444" class="atlas-svg-white atlas-svg-stroke" d="M23.862 18H4.332c-.075 0-.137-.06-.137-.134V4.164c0-.074.062-.134.137-.134h19.53c.076 0 .138.06.138.134v13.702c0 .074-.062.134-.138.134z"></path>',6));
+            $strHtml .= _nl(_indent('<path fill="#0f6ca9" d="M20.452.007H.922c-.475 0-.86.376-.86.84v13.7c0 .464.385.84.86.84h1.402v-1.41h-.818V1.417h18.36v.773h1.445V.846c0-.463-.383-.84-.857-.84zm-4.47 8.073l2.62 3.694 1.382-1.92 1.967 5.58H6.41c.047-.302.164-.745.474-1.175.956-1.345 2.93-1.41 3.273-1.426.59-.02 1.616.06 1.78.074.324.026.586.053.764.073l3.283-4.902z"></path>',6));
+            $strHtml .= _nl(_indent('<ellipse cx="9.765" cy="8.886" fill="#0f6ca9" rx="1.719" ry="1.679"></ellipse>',6));
+            $strHtml .= _nl(_indent('</g>',5));
+            $strHtml .= _nl(_indent('</svg>',4));
+            $strHtml .= _nl(_indent('</span>',3));
 
+            $strHtml .= _nl(_indent('<div class="selected-overlay" data-id="' . $strDataId . '" data-event="edit"></div>',3));
             $strHtml .= _nl(_indent('</div>', 2));
 
-            $strHtml .= _nl(_indent(
-                '<div class="selected-overlay" data-id="' . $strDataId . '" data-event="edit"></div>',
-                2
-            ));
-
-            $strHtml .= _nl(_indent('</div>', 1));
-
-            $strHtml .= _nl(_indent(
-                '<div class="delete-wrapper' . $strHiddenClass . '" data-id="' . $strDataId . '" data-event="delete">',
-                1
-            ));
-            $strHtml .= _nl(_indent(
-                '<div class="delete-overlay" data-id="' . $strDataId . '">',
-                2
-            ));
-            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 3));
-            $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">', 4));
-            $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 5));
-            $strHtml .= _nl(_indent('</svg>', 4));
-            $strHtml .= _nl(_indent('</span>', 3));
+            $strHtml .= _nl(_indent('<div class="delete-wrapper" data-id="' . $strDataId . '" data-event="delete">', 2));
+            $strHtml .= _nl(_indent('<div class="delete-overlay" data-id="' . $strDataId . '">',3));
+            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 4));
+            $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">', 5));
+            $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 6));
+            $strHtml .= _nl(_indent('</svg>', 5));
+            $strHtml .= _nl(_indent('</span>', 4));
+            $strHtml .= _nl(_indent('</div>', 3));
             $strHtml .= _nl(_indent('</div>', 2));
             $strHtml .= _nl(_indent('</div>', 1));
 
@@ -198,47 +186,48 @@
 
             $strCtrlJs = <<<FUNC
 $(document).ready(function() {
-    var choose_video = document.querySelector(".choose-video");
-    var selected_video = document.querySelector(".selected-video");
-    var embed_wrap = document.querySelector(".embed-responsive");
+    var choose_mini_gallery = document.querySelector(".choose-mini-gallery ");
+    var selected_cover_image = document.querySelector(".selected-cover-image");
+    var mini_gallery_wrapper = document.querySelector(".mini-gallery-wrapper");
+    var selected_path = document.querySelector(".selected-path");
     var selected_overlay = document.querySelector(".selected-overlay");
     var delete_wrapper = document.querySelector(".delete-wrapper");
     var delete_overlay = document.querySelector(".delete-overlay");
-
-    function getVideoParams(params) {
+    
+    function getImagesParams(params) {
         var data = JSON.parse(params);
         console.log(data);
         var id = data.id;
-        var embed = data.embed;
-
-        if (id && embed) {
-            choose_video.classList.add('hidden');
-            selected_video.classList.remove('hidden');
-            delete_wrapper.classList.remove('hidden');
-            embed_wrap.innerHTML = embed;
-            selected_video.setAttribute('data-id', id);
+        var path = data.path;
+        
+        if (id && path) {
+            choose_mini_gallery.classList.add('hidden');
+            selected_cover_image.classList.remove('hidden');
+            mini_gallery_wrapper.setAttribute('data-id', id);
+            selected_path.src = '$this->strTempUrl' + path;
+            selected_overlay.setAttribute('data-id', id);
             delete_wrapper.setAttribute('data-id', id);
             delete_overlay.setAttribute('data-id', id);
         } else {
-            choose_video.classList.remove('hidden');
-            selected_video.classList.add('hidden');
-            delete_wrapper.classList.add('hidden');
-            embed_wrap.innerHTML = '';
-            selected_video.setAttribute('data-id', '');
+            choose_mini_gallery.classList.remove('hidden');
+            selected_cover_image.classList.add('hidden');
+            mini_gallery_wrapper.setAttribute('data-id', '');
+            selected_path.src = '';
+            selected_overlay.setAttribute('data-id', '');
             delete_wrapper.setAttribute('data-id', '');
             delete_overlay.setAttribute('data-id', '');
         }
-
-        videoSave(data);
+        
+       imageSave(data);
     }
+    
+    window.getImagesParams = getImagesParams;
 
-    window.getVideoParams = getVideoParams;
-
-    videoSave = function(params) {
-        var selected_video = $(".selected-video");
+    imageSave = function(params) {
+        var selected_path = $(".selected-path");
         qcubed.recordControlModification("$this->ControlId", "_Items", params);
-        var VideoSaveEvent = $.Event("videosave");
-        selected_video.trigger(VideoSaveEvent);
+        var ImageSaveEvent = $.Event("imagesave");
+        selected_path.trigger(ImageSaveEvent);
     }
 });
 FUNC;
@@ -268,10 +257,8 @@ FUNC;
                 case "EmptyImagesAlt": return $this->strEmptyImagesAlt;
                 case 'SelectedImagesId': return $this->intSelectedImagesId;
                 case 'CoverImageId': return $this->intCoverImageId;
+                case 'TempUrl': return $this->strTempUrl;
                 case 'CoverImagePath': return $this->strCoverImagePath;
-
-
-                case "SelectedVideoAlt": return $this->strSelectedVideoAlt;
                 case "RemoveAssociation": return $this->strRemoveAssociation;
 
                 default:
@@ -331,7 +318,7 @@ FUNC;
                         $objExc->IncrementOffset();
                         throw $objExc;
                     }
-                case "SelectedSelectedId":
+                case "SelectedImagesId":
                     try {
                         $this->intSelectedImagesId = Type::Cast($mixValue, Type::INTEGER);
                         $this->blnModified = true;
@@ -349,21 +336,18 @@ FUNC;
                         $objExc->IncrementOffset();
                         throw $objExc;
                     }
-                case "CoverImagePath":
+                case "TempUrl":
                     try {
-                        $this->strCoverImagePath = Type::Cast($mixValue, Type::STRING);
+                        $this->strTempUrl = Type::Cast($mixValue, Type::STRING);
                         $this->blnModified = true;
                         break;
                     } catch (InvalidCast $objExc) {
                         $objExc->IncrementOffset();
                         throw $objExc;
                     }
-
-
-
-                case "SelectedVideoAlt":
+                case "CoverImagePath":
                     try {
-                        $this->strSelectedVideoAlt = Type::Cast($mixValue, Type::STRING);
+                        $this->strCoverImagePath = Type::Cast($mixValue, Type::STRING);
                         $this->blnModified = true;
                         break;
                     } catch (InvalidCast $objExc) {

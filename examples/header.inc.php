@@ -28,6 +28,9 @@
     <link href="../assets/css/awesome-bootstrap-checkbox.css" rel="stylesheet"/>
     <link href="<?= QCUBED_BOOTSTRAP_CSS ?>" rel="stylesheet"/>
     <link href="../assets/css/custom-buttons-inputs.css" rel="stylesheet"/>
-    <link href="../assets/css/custom-svg-icons.css" rel="stylesheet" />
+    <link href="../assets/css/qcubed.fileupload.css" rel="stylesheet" />
+    <link href="../assets/css/vauu-table.css" rel="stylesheet" />
+    <link href="../assets/css/toastr.css" rel="stylesheet" />
+    <script type="text/javascript" src="../assets/js/qcubed.minigallery-helper.js"></script>
 </head>
 <body>

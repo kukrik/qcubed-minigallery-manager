@@ -1,5 +1,5 @@
 (function ($) {
-    $.fn.uploadHandler = function (options) {
+    $.fn.galleryUpload = function (options) {
         options = $.extend({
             language: null,
             showIcons: false,
@@ -17,7 +17,7 @@
 
         // This unit set to a new array
         const storedFiles = [];
-        // This unit set to an error array
+        // his unit set to an error arrayT
         const storedErrors = [];
         // This unit set to a queued array of files waiting to be uploaded
         let storedQueue = [];
@@ -33,6 +33,8 @@
 
         // his unit set to an alert array
         let errorMessages = [];
+
+        let responseError = "";
 
         /////////////////////////////////////////
 
@@ -108,7 +110,7 @@
                 remove_invalid_inputs_maxFileSize_Lbl: 'Максимально допустимый размер для каждого файла составляет до %s',
                 remove_invalid_inputs_minFileSize_Lbl: 'Каждый файл должен превышать минимальный размер %s'
             }
-        }
+        };
 
         // The default language is English (en) unless another language is selected
         options.language = options.language ? options.language : 'en';
@@ -117,47 +119,26 @@
 
         /////////////////////////////////////////
 
-        // Get a reference to the 8 buttons
+        // Get a reference to the 5 buttons
         const file_input = document.querySelector(".fileinput-button");
         const input = file_input.querySelector("#files");
-
         const all_start = document.querySelector(".all-start");
         const all_cancel = document.querySelector(".all-cancel");
         const back = document.querySelector(".back");
         const fileupload_donebar = document.querySelector(".fileupload-donebar");
         const done_button = document.querySelector(".done");
-        const files_heading = document.querySelector(".files-heading");
-        const search = document.querySelector("[type='search']");
+
 
         /////////////////////////////////////////
 
-        // Get a reference to div of the fileupload-buttonbar
-        const fileupload_buttonbar = document.querySelector(".fileupload-buttonbar");
-        fileupload_buttonbar.classList.add("hidden");
-
-        // Get the div references
-        const body = document.querySelector("body");
-        const upload_wrapper = document.querySelector(".upload-wrapper");
-        const scroll_wrapper = document.querySelector(".scroll-wrapper");
-        const dialog_wrapper = document.querySelector(".dialog-wrapper");
-
-        /////////////////////////////////////////
-
-        // inputs form handler
+        // input form handler
         input.addEventListener("change", handleFileSelect);
-        //launch_start.addEventListener("change", handleFileSelect);
         // all_start upload handler
         all_start.addEventListener("click", handleForm);
         // all_cancel files delete handler
         all_cancel.addEventListener("click", cancelAllUploads);
         // finished result handler
         done_button.addEventListener("click", doneForm);
-
-        // Resetting elements
-        all_start.classList.add("disabled");
-        all_start.setAttribute("disabled", "disabled");
-        all_cancel.classList.add("disabled");
-        all_cancel.setAttribute("disabled", "disabled");
 
         /////////////////////////////////////////
 
@@ -175,7 +156,6 @@
         // Prepare table headers
         const table = document.createElement("table");
         table.className = "table table-striped";
-        table.setAttribute("id", "fileUpload");
         files.appendChild(table);
 
         const colgroup = document.createElement("colgroup");
@@ -200,9 +180,7 @@
 
         function handleFileSelect(e) {
             all_start.classList.remove("disabled");
-            all_start.removeAttribute("disabled");
             all_cancel.classList.remove("disabled");
-            all_cancel.removeAttribute("disabled");
             back.classList.add("disabled");
             back.setAttribute("disabled", "disabled");
             // Clear the alert/alerts
@@ -268,7 +246,7 @@
                 const text_error = document.createElement("strong");
                 text_error.setAttribute("data-name", cleanFileName(f.name));
                 text_error.className = "error text-error";
-                text_error.innerText = validate(f) ? validate(f) : '';
+                text_error.innerText = validate(f) ? validate(f) : "";
                 nameTd.appendChild(text_error);
 
                 const sizeTd = document.createElement("td");
@@ -321,14 +299,15 @@
                 list.appendChild(nameTd);
                 list.appendChild(sizeTd);
                 list.appendChild(btnTd);
-            };
+            }
 
             const children = document.querySelectorAll(".cancel");
             for (let i = 0, len = children.length; i < len; i++) {
                 children[i].addEventListener("click", removeFile, true);
             }
-            handleUploads();
             errorsExistenceControl();
+
+            console.log(storedFiles);
         }
 
         //////////////////////////////////////////
@@ -345,13 +324,10 @@
             // Clear or reset the inputs
             if (storedFiles.length > 0 || (storedFiles.length > 0 && storedErrors.length > 0)) {
                 file_input.classList.add("disabled");
-                input.setAttribute('disabled', 'disabled');
                 all_start.classList.add("disabled");
-                all_start.setAttribute('disabled', 'disabled');
                 all_cancel.classList.add("disabled");
-                all_cancel.setAttribute('disabled', 'disabled');
                 back.classList.add("disabled");
-                back.setAttribute('disabled', 'disabled');
+                back.setAttribute("disabled", "disabled");
 
                 const children = document.querySelectorAll(".cancel");
                 for (let i = 0, len = children.length; i < len; i++) {
@@ -367,19 +343,6 @@
                 return;
             }
             checkQueue();
-        }
-
-        //////////////////////////////////////////
-
-        function handleUploads() {
-            const parent_div = document.querySelector(".files");
-            const child_div = document.querySelector(".preview");
-
-            if (parent_div.contains(child_div)) {
-                files_heading.classList.add("hidden");
-                fileupload_buttonbar.classList.remove("hidden");
-                files.classList.remove("hidden");
-             }
         }
 
         //////////////////////////////////////////
@@ -402,7 +365,7 @@
                         uploadFile(storedQueue[i]);
                     }
                     transfering++;
-                    
+
                     if (transfering >= options.limitConcurrentUploads) {
                         return;
                     } else {
@@ -529,7 +492,11 @@
 
                             all_start.classList.add("disabled");
                             all_cancel.classList.add("disabled");
-                            fileupload_donebar.classList.remove("hidden");
+
+                            back.classList.add("disabled");
+                            back.setAttribute("disabled", "disabled");
+
+                            done_button.classList.remove("hidden");
                         }
                     }
                 }
@@ -615,10 +582,12 @@
                         all_start.setAttribute('disabled', 'disabled');
                         all_cancel.classList.add("disabled");
                         all_cancel.setAttribute('disabled', 'disabled');
-                        fileupload_donebar.classList.remove("hidden");
+
+                        back.classList.add("disabled");
+                        back.setAttribute("disabled", "disabled");
                     }
                 }
-            });
+            })
 
             xhr.onload = function () {
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -645,7 +614,7 @@
             xhr.onerror = function () {
                 text_error.innerText = "An error occurred during the upload.";
                 error_bubble.classList.remove("hidden");
-            };
+            }
         }
 
         // xhr load handler (transfer complete)
@@ -713,7 +682,7 @@
                 interruptedFiles++;
             });
 
-            uploadResponses(storedFiles, uploadedFiles, interruptedFiles);
+             uploadResponses(storedFiles, uploadedFiles, interruptedFiles);
         }
 
         //////////////////////////////////////////
@@ -749,6 +718,8 @@
             if (options.minFileSize && options.minFileSize > e.size) {
                 return languages[options.language].minFileSize_Lbl;
             }
+
+            return '';
         }
 
         function typeError(e) {
@@ -807,15 +778,15 @@
                 restrictionRemoving();
             }
 
-            if(options.acceptFileTypes && storedAcceptFileTypes.length > 0){
+            if (options.acceptFileTypes && storedAcceptFileTypes.length > 0) {
                 errorMessages.push(sprintf(languages[options.language].remove_invalid_inputs_acceptFileTypes_Lbl, removeSpecialChars(options.acceptFileTypes)));
             }
 
-            if(options.maxFileSize && storedMaxFileSize.length > 0){
+            if (options.maxFileSize && storedMaxFileSize.length > 0) {
                 errorMessages.push(sprintf(languages[options.language].remove_invalid_inputs_maxFileSize_Lbl, readableBytes(options.maxFileSize)));
             }
 
-            if(options.minFileSize && storedMinFileSize.length > 0){
+            if (options.minFileSize && storedMinFileSize.length > 0) {
                 errorMessages.push(sprintf(languages[options.language].remove_invalid_inputs_minFileSize_Lbl, readableBytes(options.minFileSize)));
             }
 
@@ -859,13 +830,12 @@
                 tbody.innerHTML = "";
                 input.value = null;
                 alert_multi_wrapper.innerHTML = "";
-                input.removeAttribute('disabled');
                 file_input.classList.remove("disabled");
                 all_start.classList.add("disabled");
-                all_start.removeAttribute('disabled');
                 all_cancel.classList.add("disabled");
+
                 back.classList.remove("disabled");
-                back.removeAttribute('disabled');
+                back.removeAttribute("disabled");
                 return;
             }
 
@@ -937,29 +907,27 @@
                 alert_multi_wrapper.innerHTML = "";
             }
 
+            this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);
+
             if (storedFiles.length === 0) {
                 all_start.classList.add("disabled");
                 all_cancel.classList.add("disabled");
+
                 back.classList.remove("disabled");
-                back.removeAttribute('disabled');
+                back.removeAttribute("disabled");
             }
-            this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);
         }
 
         //////////////////////////////////////////
 
         function restrictionInfluencing() {
             file_input.classList.add("disabled");
-            input.setAttribute('disabled', 'disabled');
             all_start.classList.add("disabled");
-            all_start.setAttribute('disabled', 'disabled');
         }
 
-        function  restrictionRemoving() {
+        function restrictionRemoving() {
             file_input.classList.remove("disabled");
-            input.removeAttribute('disabled');
             all_start.classList.remove("disabled");
-            all_start.removeAttribute('disabled');
             alert_wrapper.innerHTML = "";
         }
 
@@ -976,8 +944,11 @@
             input.removeAttribute('disabled');
             all_start.removeAttribute('disabled');
             all_cancel.removeAttribute('disabled');
+
             back.classList.remove("disabled");
             back.removeAttribute("disabled");
+
+            fileupload_donebar.classList.add("hidden");
 
             while (storedFiles.length > 0) {
                 storedFiles.pop();
@@ -988,7 +959,7 @@
 
         //////////////////////////////////////////
 
-        // Function to show alerts
+        // Function to show alert
         // Use to color the alert: success, info, warning, danger
         function show_alert(message, alert) {
             alert_wrapper.innerHTML = `
@@ -1015,6 +986,8 @@
             alert_multi_wrapper.innerHTML = messageHtml;
         }
 
+        //////////////////////////////////////////
+
         function cleanFileName(str) {
             if (str) {
                 return str = str.replace(/(\W+)/gi, '-');
@@ -1028,8 +1001,8 @@
         }
 
         function readableBytes(bytes) {
-            const i = Math.floor(Math.log(bytes) / Math.log(1024));
-            const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024)),
+                sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
             return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
         }
 
@@ -1075,7 +1048,6 @@
                     break;
                 case 'docx':
                 case 'doc':
-                case 'odt':
                     icon = '<svg class="svg-file svg-word files-svg" viewBox="0 0 56 56"><path class="svg-file-bg" d="M36.985,0H7.963C7.155,0,6.5,0.655,6.5,1.926V55c0,0.345,0.655,1,1.463,1h40.074 c0.808,0,1.463-0.655,1.463-1V12.978c0-0.696-0.093-0.92-0.257-1.085L37.607,0.257C37.442,0.093,37.218,0,36.985,0z"></path><polygon class="svg-file-flip" points="37.5,0.151 37.5,12 49.349,12"></polygon><g class="svg-file-icon"><path d="M12.5,13h6c0.553,0,1-0.448,1-1s-0.447-1-1-1h-6c-0.553,0-1,0.448-1,1S11.947,13,12.5,13z"></path><path d="M12.5,18h9c0.553,0,1-0.448,1-1s-0.447-1-1-1h-9c-0.553,0-1,0.448-1,1S11.947,18,12.5,18z"></path><path d="M25.5,18c0.26,0,0.52-0.11,0.71-0.29c0.18-0.19,0.29-0.45,0.29-0.71c0-0.26-0.11-0.52-0.29-0.71 c-0.38-0.37-1.04-0.37-1.42,0c-0.181,0.19-0.29,0.44-0.29,0.71s0.109,0.52,0.29,0.71C24.979,17.89,25.24,18,25.5,18z"></path><path d="M29.5,18h8c0.553,0,1-0.448,1-1s-0.447-1-1-1h-8c-0.553,0-1,0.448-1,1S28.947,18,29.5,18z"></path><path d="M11.79,31.29c-0.181,0.19-0.29,0.44-0.29,0.71s0.109,0.52,0.29,0.71 C11.979,32.89,12.229,33,12.5,33c0.27,0,0.52-0.11,0.71-0.29c0.18-0.19,0.29-0.45,0.29-0.71c0-0.26-0.11-0.52-0.29-0.71 C12.84,30.92,12.16,30.92,11.79,31.29z"></path><path d="M24.5,31h-8c-0.553,0-1,0.448-1,1s0.447,1,1,1h8c0.553,0,1-0.448,1-1S25.053,31,24.5,31z"></path><path d="M41.5,18h2c0.553,0,1-0.448,1-1s-0.447-1-1-1h-2c-0.553,0-1,0.448-1,1S40.947,18,41.5,18z"></path><path d="M12.5,23h22c0.553,0,1-0.448,1-1s-0.447-1-1-1h-22c-0.553,0-1,0.448-1,1S11.947,23,12.5,23z"></path><path d="M43.5,21h-6c-0.553,0-1,0.448-1,1s0.447,1,1,1h6c0.553,0,1-0.448,1-1S44.053,21,43.5,21z"></path><path d="M12.5,28h4c0.553,0,1-0.448,1-1s-0.447-1-1-1h-4c-0.553,0-1,0.448-1,1S11.947,28,12.5,28z"></path><path d="M30.5,26h-10c-0.553,0-1,0.448-1,1s0.447,1,1,1h10c0.553,0,1-0.448,1-1S31.053,26,30.5,26z"></path><path d="M43.5,26h-9c-0.553,0-1,0.448-1,1s0.447,1,1,1h9c0.553,0,1-0.448,1-1S44.053,26,43.5,26z"></path></g><path class="svg-file-text-bg" d="M48.037,56H7.963C7.155,56,6.5,55.345,6.5,54.537V39h43v15.537C49.5,55.345,48.845,56,48.037,56z"></path><text class="svg-file-ext" x="28" y="51.5">' + ext + '</text></svg>';
                     break;
                 case 'xlsx':
@@ -1110,21 +1082,10 @@
                 case 'cdoc':
                     icon = '<svg viewBox="0 0 56 56" class="svg-file svg-archive files-svg"><path class="svg-file-bg" d="M36.985,0H7.963C7.155,0,6.5,0.655,6.5,1.926V55c0,0.345,0.655,1,1.463,1h40.074 c0.808,0,1.463-0.655,1.463-1V12.978c0-0.696-0.093-0.92-0.257-1.085L37.607,0.257C37.442,0.093,37.218,0,36.985,0z"></path><polygon class="svg-file-flip" points="37.5,0.151 37.5,12 49.349,12"></polygon><g class="svg-file-icon"><path d="M28.5,24v-2h2v-2h-2v-2h2v-2h-2v-2h2v-2h-2v-2h2V8h-2V6h-2v2h-2v2h2v2h-2v2h2v2h-2v2h2v2h-2v2h2v2 h-4v5c0,2.757,2.243,5,5,5s5-2.243,5-5v-5H28.5z M30.5,29c0,1.654-1.346,3-3,3s-3-1.346-3-3v-3h6V29z"></path><path d="M26.5,30h2c0.552,0,1-0.447,1-1s-0.448-1-1-1h-2c-0.552,0-1,0.447-1,1S25.948,30,26.5,30z"></path></g><path class="svg-file-text-bg" d="M48.037,56H7.963C7.155,56,6.5,55.345,6.5,54.537V39h43v15.537C49.5,55.345,48.845,56,48.037,56z"></path><text class="svg-file-ext" x="28" y="51.5">' + ext + '</text></svg>';
                     break;
-
-                case 'php':
-                case 'js':
-                case 'css':
-                case 'json':
-                case 'xml':
-                case 'html':
-                case 'htm':
-                case 'sql':
-                case 'yml':
-                    icon = '<svg viewBox="0 0 56 56" class="svg-file svg-code files-svg"><path class="svg-file-bg" d="M36.985,0H7.963C7.155,0,6.5,0.655,6.5,1.926V55c0,0.345,0.655,1,1.463,1h40.074 c0.808,0,1.463-0.655,1.463-1V12.978c0-0.696-0.093-0.92-0.257-1.085L37.607,0.257C37.442,0.093,37.218,0,36.985,0z"></path><polygon class="svg-file-flip" points="37.5,0.151 37.5,12 49.349,12"></polygon><g class="svg-file-icon"><path d="M15.5,24c-0.256,0-0.512-0.098-0.707-0.293c-0.391-0.391-0.391-1.023,0-1.414l6-6 c0.391-0.391,1.023-0.391,1.414,0s0.391,1.023,0,1.414l-6,6C16.012,23.902,15.756,24,15.5,24z"></path><path d="M21.5,30c-0.256,0-0.512-0.098-0.707-0.293l-6-6c-0.391-0.391-0.391-1.023,0-1.414 s1.023-0.391,1.414,0l6,6c0.391,0.391,0.391,1.023,0,1.414C22.012,29.902,21.756,30,21.5,30z"></path><path d="M33.5,30c-0.256,0-0.512-0.098-0.707-0.293c-0.391-0.391-0.391-1.023,0-1.414l6-6 c0.391-0.391,1.023-0.391,1.414,0s0.391,1.023,0,1.414l-6,6C34.012,29.902,33.756,30,33.5,30z"></path><path d="M39.5,24c-0.256,0-0.512-0.098-0.707-0.293l-6-6c-0.391-0.391-0.391-1.023,0-1.414 s1.023-0.391,1.414,0l6,6c0.391,0.391,0.391,1.023,0,1.414C40.012,23.902,39.756,24,39.5,24z"></path><path d="M24.5,32c-0.11,0-0.223-0.019-0.333-0.058c-0.521-0.184-0.794-0.755-0.61-1.276l6-17 c0.185-0.521,0.753-0.795,1.276-0.61c0.521,0.184,0.794,0.755,0.61,1.276l-6,17C25.298,31.744,24.912,32,24.5,32z"></path></g><path class="svg-file-text-bg" d="M48.037,56H7.963C7.155,56,6.5,55.345,6.5,54.537V39h43v15.537C49.5,55.345,48.845,56,48.037,56z"></path><text class="svg-file-ext" x="28" y="51.5">' + ext + '</text></svg>';
-                    break;
                 default:
                     icon = '<svg viewBox="0 0 56 56" class="svg-file svg-none files-svg"><path class="svg-file-bg" d="M36.985,0H7.963C7.155,0,6.5,0.655,6.5,1.926V55c0,0.345,0.655,1,1.463,1h40.074 c0.808,0,1.463-0.655,1.463-1V12.978c0-0.696-0.093-0.92-0.257-1.085L37.607,0.257C37.442,0.093,37.218,0,36.985,0z"></path><polygon class="svg-file-flip" points="37.5,0.151 37.5,12 49.349,12"></polygon><path class="svg-file-text-bg" d="M48.037,56H7.963C7.155,56,6.5,55.345,6.5,54.537V39h43v15.537C49.5,55.345,48.845,56,48.037,56z"></path><text class="svg-file-ext f_10" x="28" y="51.5">' + ext + '</text></svg>';
             }
+
             return icon
         }
 

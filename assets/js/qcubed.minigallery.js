@@ -7,10 +7,10 @@ $.fn.miniGallery = function (options) {
     }, options);
 
     const choose_mini_gallery = document.querySelector(".choose-mini-gallery");
-    const selected_mini_gallery = document.querySelector(".selected-mini-gallery");
+    const selected_overlay = document.querySelector(".selected-overlay");
 
-    choose_video.addEventListener("click", launchPopup);
-    selected_video.addEventListener("click", launchPopup);
+    choose_mini_gallery.addEventListener("click", launchPopup);
+    selected_overlay.addEventListener("click", launchPopup);
 
     function launchPopup(url, width, height, settings) {
         width = options.popupWidth || '90%';
