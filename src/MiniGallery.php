@@ -218,16 +218,16 @@ $(document).ready(function() {
             delete_overlay.setAttribute('data-id', '');
         }
         
-       imageSave(data);
+       gallerySave(data);
     }
     
     window.getImagesParams = getImagesParams;
 
-    imageSave = function(params) {
+    gallerySave = function(params) {
         var selected_path = $(".selected-path");
         qcubed.recordControlModification("$this->ControlId", "_Items", params);
-        var ImageSaveEvent = $.Event("imagesave");
-        selected_path.trigger(ImageSaveEvent);
+        var GallerySaveEvent = $.Event("gallerysave");
+        selected_path.trigger(GallerySaveEvent);
     }
 });
 FUNC;

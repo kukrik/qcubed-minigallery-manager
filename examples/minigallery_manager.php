@@ -24,7 +24,6 @@
     class MiniGalleryForm extends Form
     {
         protected string $strRootPath = APP_UPLOADS_DIR;
-        //protected string $strRootUrl = APP_UPLOADS_URL;
         protected string $strTempPath = APP_UPLOADS_TEMP_DIR;
         protected string $strTempUrl = APP_UPLOADS_TEMP_URL;
         public array $tempFolders = ['thumbnail', 'medium', 'large'];
@@ -107,8 +106,7 @@
                 $this->objMiniGallery->CoverImagePath = $this->objMiniGallery->TempUrl . $this->objContentCoverMedia->getPreviewFilePath();
             }
 
-
-            $this->objMiniGallery->addAction(new Q\Plugin\Event\ImageSave(), new Ajax('imageSave_Push'));
+            $this->objMiniGallery->addAction(new Q\Plugin\Event\GallerySave(), new Ajax('imageSave_Push'));
             $this->objMiniGallery->addAction(new DeleteClick(0, null, '.delete-wrapper'), new Ajax('onMiniGalleryDelete'));
 
             $this->btnSubmit = new Button($this);
@@ -138,9 +136,6 @@
         protected function imageSave_Push(ActionParams $params): void
         {
             $saveId = $this->objMiniGallery->Items;
-
-            //Q\Project\Application::displayAlert('POST: ' . print_r($_POST, true));
-            //Q\Project\Application::displayAlert('IMAGESAVE: ' . $saveId['id'] . ' => ' . $saveId['path']);
 
             $this->objArticle->setmediaTypeId(2);
             $this->objArticle->setContentCoverMediaId($saveId['id']);
