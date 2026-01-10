@@ -142,7 +142,7 @@
             $strHtml .= _nl(_indent('<img src="' . $this->strCoverImagePath . '" data-id ="' . $strDataId . '" class="image selected-path img-responsive">',3));
 
             $strHtml .= _nl(_indent('<span class="gallery-img">',3));
-            $strHtml .= _nl(_indent('<svg viewBox="0 0 25 19" class="files-svg">',4));
+            $strHtml .= _nl(_indent('<svg viewBox="0 0 25 19" class="">',4));
             $strHtml .= _nl(_indent('<g fill="none" fill-rule="evenodd">',5));
             $strHtml .= _nl(_indent('<path fill="#fff" fill-opacity=".869" d="M4 4h20v14H4z"></path>',6));
             $strHtml .= _nl(_indent(' <path stroke="#0f6ca9" fill-opacity=".869" stroke-width="1.444" class="atlas-svg-white atlas-svg-stroke" d="M23.862 18H4.332c-.075 0-.137-.06-.137-.134V4.164c0-.074.062-.134.137-.134h19.53c.076 0 .138.06.138.134v13.702c0 .074-.062.134-.138.134z"></path>',6));
@@ -156,7 +156,7 @@
             $strHtml .= _nl(_indent('</div>', 2));
 
             $strHtml .= _nl(_indent('<div class="delete-wrapper" data-id="' . $strDataId . '" data-event="delete">', 2));
-            $strHtml .= _nl(_indent('<div class="delete-overlay" data-id="' . $strDataId . '">',3));
+            $strHtml .= _nl(_indent('<div class="gallery-overlay" data-id="' . $strDataId . '">',3));
             $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 4));
             $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">', 5));
             $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 6));
@@ -192,13 +192,15 @@ $(document).ready(function() {
     var selected_path = document.querySelector(".selected-path");
     var selected_overlay = document.querySelector(".selected-overlay");
     var delete_wrapper = document.querySelector(".delete-wrapper");
-    var delete_overlay = document.querySelector(".delete-overlay");
+    var gallery_overlay = document.querySelector(".gallery-overlay");
     
     function getImagesParams(params) {
         var data = JSON.parse(params);
         console.log(data);
         var id = data.id;
         var path = data.path;
+        var description = data.description;
+        var author = data.author;
         
         if (id && path) {
             choose_mini_gallery.classList.add('hidden');
@@ -207,7 +209,7 @@ $(document).ready(function() {
             selected_path.src = '$this->strTempUrl' + path;
             selected_overlay.setAttribute('data-id', id);
             delete_wrapper.setAttribute('data-id', id);
-            delete_overlay.setAttribute('data-id', id);
+            gallery_overlay.setAttribute('data-id', id);
         } else {
             choose_mini_gallery.classList.remove('hidden');
             selected_cover_image.classList.add('hidden');
@@ -215,7 +217,7 @@ $(document).ready(function() {
             selected_path.src = '';
             selected_overlay.setAttribute('data-id', '');
             delete_wrapper.setAttribute('data-id', '');
-            delete_overlay.setAttribute('data-id', '');
+            gallery_overlay.setAttribute('data-id', '');
         }
         
        gallerySave(data);

@@ -181,9 +181,6 @@
                 $this->btnGoUpload->Enabled = false;
                 $this->txtPhotoDescription->Enabled = false;
                 $this->txtPhotoAuthor->Enabled = false;
-                $this->btnSaveMiniGallery->Enabled = false;
-                $this->btnCancelMiniGallery->Enabled = false;
-
                 Application::executeJavaScript("$('.js-gallery-table').addClass('hidden');");
                 return;
             }
@@ -274,8 +271,6 @@
                 $this->lblNoImages->Display = true;
                 $this->txtPhotoDescription->Enabled = false;
                 $this->txtPhotoAuthor->Enabled = false;
-                $this->btnSaveMiniGallery->Enabled = false;
-                $this->btnCancelMiniGallery->Enabled = false;
                 Application::executeJavaScript("$('.js-gallery-table').addClass('hidden');");
             }
         }
@@ -333,17 +328,9 @@
 
             if ($previewId) {
                 $this->btnSave->Enabled = true;
-
-                $this->btnSaveMiniGallery->Enabled = true;
-                $this->btnCancelMiniGallery->Enabled = true;
-
                 Application::executeJavaScript("syncMiniGalleryCoverState($previewId);");
             } else {
                 $this->btnSave->Enabled = false;
-
-                $this->btnSaveMiniGallery->Enabled = false;
-                $this->btnCancelMiniGallery->Enabled = false;
-
                 Application::executeJavaScript("syncMiniGalleryCoverState(null);");
             }
         }
@@ -479,21 +466,6 @@
             $this->btnGoUpload->CausesValidation = false;
             $this->btnGoUpload->UseWrapper = false;
             $this->btnGoUpload->addAction(new Click(), new Ajax('btnGoUpload_Click'));
-
-            ///////////////////////////////////////////////////////////////////////////////////////////
-
-            $this->btnSaveMiniGallery = new Bs\Button($this);
-            $this->btnSaveMiniGallery->Text = t('Save');
-            $this->btnSaveMiniGallery->CssClass = 'btn btn-orange';
-            $this->btnSaveMiniGallery->addAction(new Click(), new Ajax('btnSaveMiniGallery_Click'));
-            $this->btnSaveMiniGallery->Enabled = false;
-
-            $this->btnCancelMiniGallery = new Bs\Button($this);
-            $this->btnCancelMiniGallery->Text = t('Cancel');
-            $this->btnCancelMiniGallery->CssClass = 'btn btn-default';
-            $this->btnCancelMiniGallery->CausesValidation = false;
-            $this->btnCancelMiniGallery->addAction(new Click(), new Ajax('btnCancelMiniGallery_Click'));
-            $this->btnCancelMiniGallery->Enabled = false;
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1053,7 +1025,9 @@
 
                 $_SESSION['coverMedia'] = [
                     'id'   => $this->objContentCoverMedia->getId(),
-                    'path' => $objMiniGallery->getPath()
+                    'path' => $objMiniGallery->getPath(),
+                    "description" => $this->objContentCoverMedia->getDescription(),
+                    "author" => $this->objContentCoverMedia->getAuthor()
                 ];
 
                 $this->btnSave->Enabled = true;
@@ -1317,6 +1291,25 @@
                 return;
             }
 
+            if ((!$this->txtPhotoAuthor->Text && $this->txtPhotoDescription->Text) || ((!$this->txtPhotoDescription->Text) && $this->txtPhotoAuthor->Text)) {
+                $this->dlgModal7->showDialogBox();
+                return;
+            }
+
+            $objContentCoverMedia = ContentCoverMedia::load($coverMediaId);
+
+            if ($this->txtPhotoDescription->Text !== $objContentCoverMedia->getDescription() ||
+                $this->txtPhotoAuthor->Text !== $objContentCoverMedia->getAuthor()) {
+
+                $objContentCoverMedia->setDescription($this->txtPhotoDescription->Text);
+                $objContentCoverMedia->setAuthor($this->txtPhotoAuthor->Text);
+            }
+
+            $objContentCoverMedia->setPostUpdateDate(QDateTime::now());
+            $objContentCoverMedia->save();
+
+            $this->dlgToastr5->notify();
+
             $countMiniGallery = MiniGallery::countByContentCoverMediaId($coverMediaId);
 
             if ($countMiniGallery === 1) {
@@ -1329,7 +1322,9 @@
             } else {
                 $params = [
                     "id" => $this->objContentCoverMedia->getId(),
-                    "path" =>$this->objContentCoverMedia->getPreviewFilePath()
+                    "path" => $this->objContentCoverMedia->getPreviewFilePath(),
+                    "description" => $this->txtPhotoDescription->Text ?? null,
+                    "author" => $this->txtPhotoAuthor->Text ?? null
                 ];
             }
 

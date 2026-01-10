@@ -45,12 +45,6 @@
                         <?= _r($this->txtPhotoAuthor); ?>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-8" style="text-align: right;">
-                        <?= _r($this->btnSaveMiniGallery); ?>
-                        <?= _r($this->btnCancelMiniGallery); ?>
-                    </div>
-                </div>
                 <div class="table-wrapper js-gallery-table">
                     <?= _r($this->tblMiniGalleryList); ?>
                 </div>
