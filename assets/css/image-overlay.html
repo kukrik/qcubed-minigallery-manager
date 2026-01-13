@@ -43,6 +43,30 @@
           height: auto;
       }
 
+      /* /////////////////////////////////////////// */
+
+      .incident-overlay {
+          position: absolute;
+          display: block;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.1); /* Black see-through */
+          color: #f1f1f1;
+          width: 100%;
+          transition: .5s ease;
+          opacity: 1;
+          color: white;
+          font-size: 14px;
+          padding: 20px 0 10px 10px;
+
+      }
+
+      .incident-wrapper .incident-overlay:hover {
+          cursor: pointer;
+      }
+
+
+      /* /////////////////////////////////////////// */
+
       .mini-gallery-wrapper .selected-overlay {
           position: absolute;
           display: block;
@@ -114,11 +138,23 @@
 
 
 <div id="c234" class="multi-images-container">
-    <div class="choose-mini-gallery hidden">
-        <img src="../images/empty-multi-images-icon.png" alt="Choose a mini gallery" class="image img-responsive">
+    <div class="empty-multi-images-wrapper "> <!-- hidden -->
+        <div class="choose-mini-gallery">
+            <img src="../images/empty-multi-images-icon.png" alt="Choose a mini gallery" class="image img-responsive">
+        </div>
+
+        <div class="incident-wrapper" data-id="" data-event="delete"> <!-- hidden -->
+            <div class="incident-overlay" data-id="">
+                <span class="overLay-right" aria-label="Remove association">
+                    <svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>
+                    </svg>
+                </span>
+            </div>
+        </div>
     </div>
 
-    <div class="selected-cover-image">
+    <div class="selected-cover-image hidden"> <!-- hidden -->
 
         <div class="mini-gallery-wrapper" data-id="">
             <img src="../images/ilus_vanavarav_looduses.jpg" alt="" class="image img-responsive">
@@ -148,6 +184,27 @@
     </div>
 
 </div>
+
+<script type="text/javascript" src="/vendor/qcubed-4/application/assets/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.choose-mini-gallery').click(function() {
+            alert("The empty image was clicked.");
+        });
+
+        $('.incident-wrapper').click(function() {
+            alert("Delete click!");
+        });
+
+        $('.selected-overlay').click(function() {
+            alert("To the editing view!");
+        });
+
+        $('.delete-overlay').click(function() {
+            alert("Deleted pictures!");
+        });
+    });
+</script>
 
 </body>
 </html>

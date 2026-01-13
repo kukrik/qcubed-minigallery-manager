@@ -23,6 +23,7 @@
      * @property string $CoverImagePath Default null. The path of the selected cover image with the file name.
      * @property string $RemoveAssociation Default "Remove association"
      * @property array $Items
+     * @property bool $GalleryState
      *
      * @package QCubed\Plugin
      */
@@ -31,9 +32,10 @@
     {
         /** @var null|array Items */
         protected ?array $strItems  = null;
+        /** @var bool GalleryCount */
+        protected bool $blnGalleryState = false;
         /** @var string TempUrl */
         protected string $strTempUrl = APP_UPLOADS_TEMP_URL . '/_files/thumbnail';
-
         /** @var string EmptyImagesPath */
         protected string $strEmptyImagesPath = QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/empty-multi-images-icon.png";
         /** @var null|string EmptyImagesAlt */
@@ -106,18 +108,37 @@
         {
             $strHtml = '';
 
-            if (!$this->intSelectedImagesId) {
-                $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 1));
+            $strDataId = $this->intSelectedImagesId ? (string)$this->intSelectedImagesId: '';
+            $strHiddenClass = $this->intSelectedImagesId ? ' hidden' : '';
+
+            if (!$this->intSelectedImagesId) { // NULL
+
+                $strHtml .= _nl(_indent('<div class="empty-multi-images-wrapper">', 1));
+
+                $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
             } else {
-                $strHtml .= _nl(_indent('<div class="choose-mini-gallery hidden">', 1));
+                $strHtml .= _nl(_indent('<div class="empty-multi-images-wrapper hidden">', 1));
+
+                $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
             }
 
             if ($this->strEmptyImagesAlt) {
-                $strHtml .= _nl(_indent('<img src="' . $this->strEmptyImagesPath . '" alt="' . $this->strEmptyImagesAlt . '" class="image img-responsive">', 2));
+                $strHtml .= _nl(_indent('<img src="' . $this->strEmptyImagesPath . '" alt="' . $this->strEmptyImagesAlt . '" class="image img-responsive">', 3));
             } else {
-                $strHtml .= _nl(_indent('<img src="' . $this->strEmptyImagesPath . '" class="image img-responsive">', 2));
+                $strHtml .= _nl(_indent('<img src="' . $this->strEmptyImagesPath . '" class="image img-responsive">', 3));
             }
 
+            $strHtml .= _nl(_indent('</div>', 2));
+
+            $strHtml .= _nl(_indent('<div class="incident-wrapper' . $strHiddenClass . '" data-id="' . $strDataId . '" data-event="delete">', 2));
+            $strHtml .= _nl(_indent('<div class="incident-overlay" data-id="' . $strDataId . '">',3));
+            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 4));
+            $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-incident files-svg" focusable="false" aria-hidden="true">', 5));
+            $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 6));
+            $strHtml .= _nl(_indent('</svg>', 5));
+            $strHtml .= _nl(_indent('</span>', 4));
+            $strHtml .= _nl(_indent('</div>', 3));
+            $strHtml .= _nl(_indent('</div>', 2));
             $strHtml .= _nl(_indent('</div>', 1));
 
             return $strHtml;
@@ -186,7 +207,9 @@
 
             $strCtrlJs = <<<FUNC
 $(document).ready(function() {
-    var choose_mini_gallery = document.querySelector(".choose-mini-gallery ");
+    var empty_multi_images_wrapper = document.querySelector(".empty-multi-images-wrapper");
+    // Incident wrapper = escape action for abandoning mini gallery setup
+    var incident_wrapper = document.querySelector(".incident-wrapper");
     var selected_cover_image = document.querySelector(".selected-cover-image");
     var mini_gallery_wrapper = document.querySelector(".mini-gallery-wrapper");
     var selected_path = document.querySelector(".selected-path");
@@ -203,16 +226,17 @@ $(document).ready(function() {
         var author = data.author;
         
         if (id && path) {
-            choose_mini_gallery.classList.add('hidden');
-            selected_cover_image.classList.remove('hidden');
+            empty_multi_images_wrapper.classList.add('hidden');
+            //selected_cover_image.classList.add('hidden');
+            //incident_wrapper.classList.add('hidden');
             mini_gallery_wrapper.setAttribute('data-id', id);
             selected_path.src = '$this->strTempUrl' + path;
             selected_overlay.setAttribute('data-id', id);
             delete_wrapper.setAttribute('data-id', id);
             gallery_overlay.setAttribute('data-id', id);
         } else {
-            choose_mini_gallery.classList.remove('hidden');
-            selected_cover_image.classList.add('hidden');
+            empty_multi_images_wrapper.classList.remove('hidden');
+            //selected_cover_image.classList.add('hidden');
             mini_gallery_wrapper.setAttribute('data-id', '');
             selected_path.src = '';
             selected_overlay.setAttribute('data-id', '');
@@ -231,6 +255,23 @@ $(document).ready(function() {
         var GallerySaveEvent = $.Event("gallerysave");
         selected_path.trigger(GallerySaveEvent);
     }
+    
+    function updateMiniGalleryState(data) {
+        if (data.hasCover) {
+            empty_multi_images_wrapper.classList.add('hidden');
+            mini_gallery_wrapper.classList.remove('hidden');
+        } else {
+            mini_gallery_wrapper.classList.add('hidden');
+            empty_multi_images_wrapper.classList.remove('hidden');
+        }
+        
+        qcubed.recordControlModification("$this->ControlId", "_GalleryState", data.hasCover);
+
+        var galleryStateEvent = $.Event("gallerystate");
+        $(".empty-multi-images-wrapper").trigger(galleryStateEvent); 
+    }
+
+    window.updateMiniGalleryState = updateMiniGalleryState; 
 });
 FUNC;
             Application::executeJavaScript($strCtrlJs, ApplicationBase::PRIORITY_HIGH);
@@ -255,6 +296,7 @@ FUNC;
         {
             switch ($strName) {
                 case 'Items': return $this->strItems;
+                case 'GalleryState': return $this->blnGalleryState;
                 case "EmptyImagesPath": return $this->strEmptyImagesPath;
                 case "EmptyImagesAlt": return $this->strEmptyImagesAlt;
                 case 'SelectedImagesId': return $this->intSelectedImagesId;
@@ -296,6 +338,15 @@ FUNC;
                 case "_Items": // Internal only. Do not use. Used by JS above to track selections.
                     try {
                         $this->strItems = Type::cast($mixValue, Type::ARRAY_TYPE);
+                        $this->blnModified = true;
+                        break;
+                    } catch (InvalidCast $objExc) {
+                        $objExc->IncrementOffset();
+                        throw $objExc;
+                    }
+                case "_GalleryState": // Internal only. Do not use. Used by JS above to track selections.
+                    try {
+                        $this->blnGalleryState = Type::Cast($mixValue, Type::BOOLEAN);
                         $this->blnModified = true;
                         break;
                     } catch (InvalidCast $objExc) {

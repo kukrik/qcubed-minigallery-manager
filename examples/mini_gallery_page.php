@@ -161,6 +161,11 @@
                 $this->objMiniGallery = MiniGallery::loadArrayByContentCoverMediaId($this->objContentCoverMedia->getId());
             }
 
+            if (!empty($_SESSION['logged_user_id'])) {
+                $this->intLoggedUserId = $_SESSION['logged_user_id'];
+                $this->objUser = User::load($this->intLoggedUserId);
+            }
+
             $this->createTable();
             $this->createInputs();
             $this->createButtons();
@@ -194,7 +199,7 @@
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
-            if (is_null($this->objContentCoverMedia)) {
+            if ($this->objContentCoverMedia === null) {
                 $registerPath = Folders::loadById($this->objMiniGalleryRegister);
                 $fullPath = $this->strRootPath . $registerPath->getPath();
 
@@ -206,7 +211,7 @@
                             continue;
                         }
 
-                        $itemPath = $fullPath . $item;
+                        $itemPath = $fullPath . '/' . $item;
 
                         if (is_dir($itemPath) && ctype_digit($item)) {
                             $number = (int)$item;
@@ -620,7 +625,7 @@
         public function createObjects(): void
         {
             $this->objUpload = new Q\Plugin\GalleryUploadHandler($this);
-            $this->objUpload->Language = 'et'; // Default en
+            $this->objUpload->Language = $this->objUser->PreferredLanguageObject->Code ?? 'en';
             //$this->objUpload->ShowIcons = true; // Default false
             $this->objUpload->AcceptFileTypes = ['jpg', 'jpeg', 'bmp', 'png', 'webp', 'gif']; // Default null
             //$this->objUpload->MaxNumberOfFiles = 5; // Default null
@@ -656,7 +661,7 @@
                 $('.js-gallery-upload-form').removeClass('hidden');
             ");
 
-            //$this->userOptions();
+            $this->userOptions();
         }
 
         /**
@@ -674,7 +679,7 @@
                 $_SESSION['folderPath'] = $this->objContentCoverMedia->getFolderPath();
             }
 
-            //$this->userOptions();
+            $this->userOptions();
         }
 
         /**
@@ -699,7 +704,7 @@
             $this->txtPhotoDescription->Enabled = true;
             $this->txtPhotoAuthor->Enabled = true;
 
-            //$this->userOptions();
+            $this->userOptions();
         }
 
         /**
@@ -760,6 +765,8 @@
             $objContentCoverMedia->setPostUpdateDate(QDateTime::now());
             $objContentCoverMedia->save();
 
+            $this->userOptions();
+
             $this->dlgToastr5->notify();
         }
 
@@ -783,6 +790,8 @@
 
             $this->txtPhotoDescription->Text = $objContentCoverMedia->getDescription();
             $this->txtPhotoAuthor->Text = $objContentCoverMedia->getAuthor();
+
+            $this->userOptions();
 
             $this->dlgToastr6->notify();
         }
@@ -1011,11 +1020,21 @@
          */
         protected function chkSelected_Click(string $strFormId, string $strControlId, array $params): void
         {
+            $coverMediaId = $this->getActiveCoverMediaId();
+
             $blnChecked = (bool)$params['checked'];
             $idParts = explode('_', $params['id']);
             $intGalleryId = (int)end($idParts);
 
             if ($blnChecked) {
+                $countMiniGallery = MiniGallery::countByContentCoverMediaId($coverMediaId);
+
+                if ($countMiniGallery === 1) {
+                    $this->dlgModal2->showDialogBox();
+                    Application::executeJavaScript("syncMiniGalleryCoverState(null);");
+                    return;
+                }
+
                 $objMiniGallery = MiniGallery::load($intGalleryId);
 
                 $this->objContentCoverMedia->setPreviewFileId($intGalleryId);
@@ -1045,7 +1064,7 @@
 
                 Application::executeJavaScript("syncMiniGalleryCoverState(null);");
 
-                //$this->userOptions();
+                $this->userOptions();
             }
         }
 
@@ -1069,7 +1088,7 @@
             $this->txtFileAuthor->Text = $objMiniGallery->getAuthor() ?? '';
             Application::executeControlCommand($this->txtFileName->ControlId, 'focus');
 
-            //$this->userOptions();
+            $this->userOptions();
 
             $this->tblMiniGalleryList->refresh();
         }
@@ -1167,7 +1186,7 @@
             $this->intChangeFilesId = null;
             $this->tblMiniGalleryList->refresh();
 
-            //$this->userOptions();
+            $this->userOptions();
         }
 
         /**
@@ -1182,6 +1201,8 @@
         {
             $this->intChangeFilesId = null;
             $this->tblMiniGalleryList->refresh();
+
+            $this->userOptions();
         }
 
         /**
@@ -1212,7 +1233,7 @@
             $objContentCoverMedia->setPostUpdateDate(QDateTime::now());
             $objContentCoverMedia->save();
 
-            //$this->userOptions();
+            $this->userOptions();
 
             $this->dlgModal4->showDialogBox();
         }
@@ -1246,7 +1267,7 @@
                 $objFile->delete();
                 $objMiniGallery->delete();
 
-                //$this->userOptions();
+                $this->userOptions();
             }
 
             if (is_file($this->strRootPath . $objMiniGallery->getPath())) {
@@ -1323,8 +1344,8 @@
                 $params = [
                     "id" => $this->objContentCoverMedia->getId(),
                     "path" => $this->objContentCoverMedia->getPreviewFilePath(),
-                    "description" => $this->txtPhotoDescription->Text ?? null,
-                    "author" => $this->txtPhotoAuthor->Text ?? null
+                    "description" => $this->txtPhotoDescription->Text ?? '',
+                    "author" => $this->txtPhotoAuthor->Text ?? ''
                 ];
             }
 
@@ -1351,6 +1372,8 @@
             Application::executeJavaScript(
                 "window.parent.opener.getImagesParams(" . json_encode($data) . "); window.close();"
             );
+
+            $this->userOptions();
         }
 
         /**
@@ -1368,12 +1391,23 @@
          */
         public function btnCancel_Click(ActionParams $params): void
         {
-            unset($_SESSION['coverMedia']);
-            unset($_SESSION['coverMediaId']);
-            unset($_SESSION['folderId']);
-            unset($_SESSION['folderPath']);
+            $coverMediaId = $this->getActiveCoverMediaId();
+            $objContentCoverMedia = ContentCoverMedia::load($coverMediaId);
 
-            Application::executeJavaScript("window.close();");
+            $data = [
+                'hasCover' => (bool)$objContentCoverMedia?->getPreviewFileId()
+            ];
+
+            if (!empty($_SESSION['coverMedia'])) unset($_SESSION['coverMedia']);
+            if (!empty($_SESSION['coverMediaId'])) unset($_SESSION['coverMediaId']);
+            if (!empty($_SESSION['coverMediaId'])) unset($_SESSION['coverMediaId']);
+            if (!empty($_SESSION['folderPath'])) unset($_SESSION['folderPath']);
+
+            $this->userOptions();
+
+            Application::executeJavaScript(
+                "window.parent.opener.updateMiniGalleryState(" . json_encode($data) . "); window.close();"
+            );
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////

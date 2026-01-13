@@ -58,7 +58,7 @@
         {
             // For development purposes
 
-            $this->objArticle = Article::load(97);
+            $this->objArticle = Article::load(105);
             $this->intGroup = $this->objArticle->getMenuContentId(); // This is the group key: 664
             $this->objContentCoverMedia = ContentCoverMedia::load($this->objArticle->getContentCoverMediaId());
 

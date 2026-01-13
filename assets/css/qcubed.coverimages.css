@@ -37,6 +37,27 @@
     height: auto;
 }
 
+.incident-overlay {
+    position: absolute;
+    display: block;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1); /* Black see-through */
+    width: 100%;
+    opacity: 1;
+    font-size: 14px;
+    padding: 20px 0 10px 10px;
+
+}
+
+.incident-wrapper .incident-overlay:hover {
+    cursor: pointer;
+}
+
+.svg-incident {
+    stroke: #ff0000;
+    stroke-width: 0.15em;
+}
+
 .mini-gallery-wrapper .selected-overlay {
     position: absolute;
     display: block;
@@ -56,14 +77,12 @@
 
 .gallery-overlay {
     position: absolute;
-    /*display: block;*/
     bottom: 0;
     background: rgba(0, 0, 0, 0.4); /* Black see-through */
     color: #f1f1f1;
     width: 100%;
     transition: .5s ease;
     opacity:0;
-    color: white;
     font-size: 14px;
     padding: 20px 0 10px 10px;
 }

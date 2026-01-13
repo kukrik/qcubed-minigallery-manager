@@ -5,14 +5,14 @@
     use QCubed\Event\EventBase;
 
     /**
-     * Class ImageSave
+     * Class GalleryState
      *
      * Captures the save an event that occurs after the popup is closed.
      *
      */
 
-    class ImageSave extends EventBase {
+    class GalleryState extends EventBase {
 
-        const string EVENT_NAME = 'imagesave';
+        const string EVENT_NAME = 'gallerystate';
         const string JS_RETURN_PARAM = 'ui';
     }
