@@ -11,6 +11,6 @@
       "psr-4": {"QCubed\\Plugin\\": "src/"}
     },
     "extra": {
-        "examples": ["minigallery_manager.php"]
+        "examples": ["minigallery_manager.php", "nano-gallery-cover.php"]
     }
 }

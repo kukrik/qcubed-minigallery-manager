@@ -15,10 +15,10 @@
      *
      * @property string $EmptyImagesPath Default predefined image can be overridden and replaced with another image if desired
      * @property string $EmptyImagesAlt Default null. The recommendation is to add the following text: "Choose a mini gallery"
+     * @property integer $ContentCoverMediaId Default null. Default null. The ID of an existing row in the database table.
      * @property integer $SelectedImagesId Default null. For selected images, the image group ID is entered.
      *                                      The IDs of the selected images are also entered into the selected table column
      *                                      in the database, along with the ID of the image group.
-     * @property integer $CoverImageId Default null. In the case of a selected cover image, the id of the cover image is pushed.
      * @property string $TempUrl Default APP_UPLOADS_TEMP_URL. The path to the temporary folder where the uploaded images are stored.
      * @property string $CoverImagePath Default null. The path of the selected cover image with the file name.
      * @property string $RemoveAssociation Default "Remove association"
@@ -37,13 +37,13 @@
         /** @var string TempUrl */
         protected string $strTempUrl = APP_UPLOADS_TEMP_URL . '/_files/thumbnail';
         /** @var string EmptyImagesPath */
-        protected string $strEmptyImagesPath = QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/empty-multi-images-icon.png";
+        protected string $strEmptyImagesPath = QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/empty-multi-images-icon.png";
         /** @var null|string EmptyImagesAlt */
         protected ?string $strEmptyImagesAlt = null;
+        /** @var null|integer ContentCoverMediaId */
+        protected ?int $intContentCoverMediaId = null;
         /** @var null|integer SelectedImagesId */
         protected ?int $intSelectedImagesId = null;
-        /** @var null|integer CoverImageId */
-        protected ?int $intCoverImageId = null;
         /** @var null|string CoverImagePath */
         protected ?string $strCoverImagePath = null;
         /** @var string RemoveAssociation */
@@ -75,9 +75,9 @@
          */
         protected function registerFiles(): void
         {
-            $this->AddCssFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.coverimages.css");
-            $this->AddJavascriptFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery.js");
-            $this->AddJavascriptFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery-helper.js");
+            $this->AddCssFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.coverimages.css");
+            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery.js");
+            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.minigallery-helper.js");
             $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         }
 
@@ -108,6 +108,7 @@
         {
             $strHtml = '';
 
+            $strCoverMediaId = $this->intContentCoverMediaId ? (string)$this->intContentCoverMediaId: '';
             $strDataId = $this->intSelectedImagesId ? (string)$this->intSelectedImagesId: '';
             $strHiddenClass = $this->intSelectedImagesId ? ' hidden' : '';
 
@@ -130,9 +131,9 @@
 
             $strHtml .= _nl(_indent('</div>', 2));
 
-            $strHtml .= _nl(_indent('<div class="incident-wrapper' . $strHiddenClass . '" data-id="' . $strDataId . '" data-event="delete">', 2));
-            $strHtml .= _nl(_indent('<div class="incident-overlay" data-id="' . $strDataId . '">',3));
-            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 4));
+            $strHtml .= _nl(_indent('<div class="incident-wrapper' . $strHiddenClass . '" data-id="' . $strCoverMediaId . '" data-event="delete">', 2));
+            $strHtml .= _nl(_indent('<div class="incident-overlay" data-id="' . $strCoverMediaId . '">',3));
+            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . $this->strRemoveAssociation . '">', 4));
             $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-incident files-svg" focusable="false" aria-hidden="true">', 5));
             $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 6));
             $strHtml .= _nl(_indent('</svg>', 5));
@@ -178,7 +179,7 @@
 
             $strHtml .= _nl(_indent('<div class="delete-wrapper" data-id="' . $strDataId . '" data-event="delete">', 2));
             $strHtml .= _nl(_indent('<div class="gallery-overlay" data-id="' . $strDataId . '">',3));
-            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . t($this->strRemoveAssociation) . '">', 4));
+            $strHtml .= _nl(_indent('<span class="overLay-right" aria-label="' . $this->strRemoveAssociation . '">', 4));
             $strHtml .= _nl(_indent('<svg viewBox="-15 -15 56 56" class="svg-delete files-svg" focusable="false" aria-hidden="true">', 5));
             $strHtml .= _nl(_indent('<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>', 6));
             $strHtml .= _nl(_indent('</svg>', 5));
@@ -210,6 +211,7 @@ $(document).ready(function() {
     var empty_multi_images_wrapper = document.querySelector(".empty-multi-images-wrapper");
     // Incident wrapper = escape action for abandoning mini gallery setup
     var incident_wrapper = document.querySelector(".incident-wrapper");
+    var incident_overlay = document.querySelector(".incident-overlay");
     var selected_cover_image = document.querySelector(".selected-cover-image");
     var mini_gallery_wrapper = document.querySelector(".mini-gallery-wrapper");
     var selected_path = document.querySelector(".selected-path");
@@ -227,8 +229,6 @@ $(document).ready(function() {
         
         if (id && path) {
             empty_multi_images_wrapper.classList.add('hidden');
-            //selected_cover_image.classList.add('hidden');
-            //incident_wrapper.classList.add('hidden');
             mini_gallery_wrapper.setAttribute('data-id', id);
             selected_path.src = '$this->strTempUrl' + path;
             selected_overlay.setAttribute('data-id', id);
@@ -236,7 +236,6 @@ $(document).ready(function() {
             gallery_overlay.setAttribute('data-id', id);
         } else {
             empty_multi_images_wrapper.classList.remove('hidden');
-            //selected_cover_image.classList.add('hidden');
             mini_gallery_wrapper.setAttribute('data-id', '');
             selected_path.src = '';
             selected_overlay.setAttribute('data-id', '');
@@ -264,6 +263,9 @@ $(document).ready(function() {
             mini_gallery_wrapper.classList.add('hidden');
             empty_multi_images_wrapper.classList.remove('hidden');
         }
+        
+        incident_wrapper.setAttribute('data-id', data.id);
+        incident_overlay.setAttribute('data-id', data.id);
         
         qcubed.recordControlModification("$this->ControlId", "_GalleryState", data.hasCover);
 
@@ -295,14 +297,14 @@ FUNC;
         public function __get(string $strName): mixed
         {
             switch ($strName) {
-                case 'Items': return $this->strItems;
-                case 'GalleryState': return $this->blnGalleryState;
+                case "Items": return $this->strItems;
+                case "GalleryState": return $this->blnGalleryState;
                 case "EmptyImagesPath": return $this->strEmptyImagesPath;
                 case "EmptyImagesAlt": return $this->strEmptyImagesAlt;
-                case 'SelectedImagesId': return $this->intSelectedImagesId;
-                case 'CoverImageId': return $this->intCoverImageId;
-                case 'TempUrl': return $this->strTempUrl;
-                case 'CoverImagePath': return $this->strCoverImagePath;
+                case "ContentCoverMediaId": return $this->intContentCoverMediaId;
+                case "SelectedImagesId": return $this->intSelectedImagesId;
+                case "TempUrl": return $this->strTempUrl;
+                case "CoverImagePath": return $this->strCoverImagePath;
                 case "RemoveAssociation": return $this->strRemoveAssociation;
 
                 default:
@@ -371,18 +373,18 @@ FUNC;
                         $objExc->IncrementOffset();
                         throw $objExc;
                     }
-                case "SelectedImagesId":
+                case "ContentCoverMediaId":
                     try {
-                        $this->intSelectedImagesId = Type::Cast($mixValue, Type::INTEGER);
+                        $this->intContentCoverMediaId = Type::Cast($mixValue, Type::INTEGER);
                         $this->blnModified = true;
                         break;
                     } catch (InvalidCast $objExc) {
                         $objExc->IncrementOffset();
                         throw $objExc;
                     }
-                case "CoverImageId":
+                case "SelectedImagesId":
                     try {
-                        $this->intCoverImageId = Type::Cast($mixValue, Type::INTEGER);
+                        $this->intSelectedImagesId = Type::Cast($mixValue, Type::INTEGER);
                         $this->blnModified = true;
                         break;
                     } catch (InvalidCast $objExc) {

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay</title>
+    <link href="../nanogallery2/src/css/nanogallery2.css" rel="stylesheet" />
+    <style>
+        body, html {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            color: #000;
+        }
+        /* Reset */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        .multi-images-container {
+            position: relative;
+            /*width: 100%;*/
+            height: 100%;
+            width: 600px; /* Ajutiselt pandud kindel laius*/
+        }
+        .image {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .gallery-img {
+            position: absolute;
+            display: block;
+            float: left;
+            top: 0;
+            margin-top: 25px;
+            margin-left: 25px;
+            width: 130px;
+            height: auto;
+        }
+        .mini-gallery-wrapper:hover {
+            cursor: pointer;
+        }
+        .files-svg {
+            display: block;
+            width: 100%;
+            height: 100%
+        }
+        .nGY2 .toolbar .label .title {
+            display: block;
+            margin: auto;
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+        .nGY2 .toolbar .label .description {
+            display: block;
+            margin: auto;
+            color: #ffffff !important;
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+    </style>
+
+</head>
+<body style="margin: auto 0; padding: 100px;">
+
+<h2>Mini Gallery</h2>
+<p>Hover over the image to see the effect.</p>
+
+<!--
+Praegu olemas testimiseks kaust 3, seal pildid
+1) vahtraleht_lumel.jpg // lepime kokku, et see pilt on valitud kaanepildiks
+2) vilinus reis 2263.jpg
+3) valged_orhideed.jpg
+
+
+-->
+
+
+
+<div class="multi-images-container">
+    <div class="mini-gallery-wrapper">
+        <img src="3/vahtraleht_lumel.jpg" alt="" class="image img-responsive"> <!-- Kokku lepitud kaanepildiks -->
+        <span class="gallery-img">
+            <img src="../images/multi-images-icon.svg">
+        </span>
+    </div>
+    <div id="miniGalleryNg2" style="display:none;">
+        <a href="3/vahtraleht_lumel.jpg" data-ngthumb="3/vahtraleht_lumel.jpg" data-ngdesc="FOTO: Autor 1">USA president Donald Trump jätkas laupäeval jõuliselt püüdlusi Gröönimaa omandamiseks, ähvardades Euroopa riike kuni 25-protsendiliste tollitariifidega, kuni tal õnnestub Taani territoorium ära osta.</a>
+        <a href="3/vilinus%20reis%202263.jpg" data-ngthumb="3/vilinus%20reis%202263.jpg" data-ngdesc="EKL: Autor 2">USA president Donald Trump jätkas laupäeval jõuliselt püüdlusi Gröönimaa omandamiseks, ähvardades Euroopa riike kuni 25-protsendiliste tollitariifidega, kuni tal õnnestub Taani territoorium ära osta.</a>
+        <a href="3/valged_orhideed.jpg" data-ngthumb="3/valged_orhideed.jpg" data-ngdesc="Autor 3">Lumised orhideed</a>
+    </div>
+</div>
+
+<script type="text/javascript" src="/vendor/qcubed-4/application/assets/js/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="../nanogallery2/dist/jquery.nanogallery2.js"></script>
+<script>
+    $(function () {
+        const $ng = $("#miniGalleryNg2");
+
+        // Init nanoGallery2
+        $ng.nanogallery2({
+            itemsBaseURL: "http://localhost/vendor/kukrik/qcubed-minigallery-manager/assets/css/",
+            //thumbnailHeight: 100,
+            //thumbnailWidth: 100,
+            //galleryDisplayMode: "none" // grid ei pea kasutajale nähtav olema
+            viewerToolbar: {
+                "display": true,
+                "standard": "label",
+                "fullWidth": true,
+                "minimized":  "minimizeButton, label, fullscreenButton, downloadButton, infoButton",
+            },
+            viewerTools: {
+                "topLeft": "pageCounter",
+                "topRight": "playPauseButton, zoomButton, rotateLeftButton, rotateRightButton, fullscreenButton, shareButton, downloadButton, closeButton"
+            },
+            locationHash: false
+
+        });
+
+        // Cover click -> open viewer directly
+        $(".mini-gallery-wrapper").on("click", function (e) {
+            e.preventDefault();
+            $ng.nanogallery2("displayItem", "0/1");
+        });
+    });
+</script>
+
+
+</body>
+</html>

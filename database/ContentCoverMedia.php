@@ -54,6 +54,30 @@
         }
 
         /**
+         * Loads a ContentCoverMedia object by its ContentId.
+         *
+         * This function performs a query to retrieve a ContentCoverMedia object
+         * that matches the specified ContentId. An optional set of additional
+         * clauses can be provided to modify the query.
+         *
+         * @param int $intId The ContentId to search for.
+         * @param mixed $objOptionalClauses Optional query clauses to apply.
+         *
+         * @return ContentCoverMedia|null The matched ContentCoverMedia object, or null if not found.
+         * @throws Caller
+         * @throws InvalidCast
+         */
+        public static function loadByIdFromId(int $intId, mixed $objOptionalClauses = null): ?ContentCoverMedia
+        {
+            // Use QuerySingle to Perform the Query
+            return ContentCoverMedia::querySingle(
+                QQ::AndCondition(
+                    QQ::Equal(QQN::ContentCoverMedia()->ContentId, $intId)
+                ), $objOptionalClauses
+            );
+        }
+
+        /**
          * Load a ContentCoverMedia object by a given group ID, with an optional set of query clauses.
          * This method performs a single query to fetch the corresponding object.
          *
@@ -70,6 +94,26 @@
             return ContentCoverMedia::querySingle(
                 QQ::AndCondition(
                     QQ::Equal(QQN::ContentCoverMedia()->MenuContentId, $intGroupId)
+                ), $objOptionalClauses
+            );
+        }
+
+        /**
+         * Loads a ContentCoverMedia object based on the provided picture ID.
+         *
+         * @param int $intPictureId The ID of the picture to load the ContentCoverMedia object for.
+         * @param mixed|null $objOptionalClauses Optional clauses for the query, such as conditions, ordering, or limits.
+         *
+         * @return ContentCoverMedia|null The loaded ContentCoverMedia object, or null if no object is found.
+         * @throws Caller
+         * @throws InvalidCast
+         */
+        public static function loadByIdFromPictureId(int $intPictureId, mixed $objOptionalClauses = null): ?ContentCoverMedia
+        {
+            // Use QuerySingle to Perform the Query
+            return ContentCoverMedia::querySingle(
+                QQ::AndCondition(
+                    QQ::Equal(QQN::ContentCoverMedia()->PictureId, $intPictureId)
                 ), $objOptionalClauses
             );
         }

@@ -1395,7 +1395,8 @@
             $objContentCoverMedia = ContentCoverMedia::load($coverMediaId);
 
             $data = [
-                'hasCover' => (bool)$objContentCoverMedia?->getPreviewFileId()
+                'hasCover' => (bool)$objContentCoverMedia?->getPreviewFileId(),
+                'id' => $objContentCoverMedia?->getId()
             ];
 
             if (!empty($_SESSION['coverMedia'])) unset($_SESSION['coverMedia']);
