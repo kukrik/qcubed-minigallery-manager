@@ -155,7 +155,7 @@
             $this->intId = Application::instance()->context()->queryStringItem('id');
             $this->intGroup = Application::instance()->context()->queryStringItem('group');
 
-            $this->objContentCoverMedia = ContentCoverMedia::loadByIdFromPopupId($this->intId);
+            $this->objContentCoverMedia = ContentCoverMedia::loadByIdAndContentId($this->intId, $this->intGroup);
 
             if ($this->objContentCoverMedia) {
                 $this->objMiniGallery = MiniGallery::loadArrayByContentCoverMediaId($this->objContentCoverMedia->getId());
@@ -199,7 +199,7 @@
 
             ///////////////////////////////////////////////////////////////////////////////////////////
 
-            if ($this->objContentCoverMedia === null) {
+            if (!$this->objContentCoverMedia) {
                 $registerPath = Folders::loadById($this->objMiniGalleryRegister);
                 $fullPath = $this->strRootPath . $registerPath->getPath();
 

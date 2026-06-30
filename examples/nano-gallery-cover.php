@@ -35,7 +35,7 @@
             $this->objCover = new Q\Plugin\NanoGalleryCover($this);
             $this->objCover->ContentCoverMediaId = 281; //281; 268; 284 // content_cover_media.id
             $this->objCover->ItemsBaseURL = $this->strTempUrl . "/_files/large";
-            $this->objCover->MultiImagesIconPath = QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/multi-images-icon.svg";
+            $this->objCover->MultiImagesIconPath = QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/images/multi-images-icon.svg";
 
             $this->objCover->ViewerToolbar = [
                 "display" => true,

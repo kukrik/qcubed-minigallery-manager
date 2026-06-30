@@ -383,7 +383,7 @@
     // -----------
     // Initialize thumbnail sizes
     function Init() {
-      return;
+
     }
 
 

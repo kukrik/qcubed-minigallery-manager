@@ -23,55 +23,66 @@
     );
 
     /**
-     * Class responsible for handling file operations specifically for MiniGallery,
-     * extending the functionality of the VauuFileHandler.
+     * Class CustomFileUploadHandler
+     *
+     * Handles file uploads, processes and stores file metadata,
+     * and updates associated folder information.
      */
     class MiniGalleryFileHandler extends VauuFileHandler
     {
         /**
-         * Handles the upload process and updates related information in the system.
+         * Save uploaded file metadata to a database and only then output JSON.
          *
-         * This method processes the upload by creating and saving file details and associated metadata,
-         * including a folder, mini gallery, and content cover media information.
-         * It ensures that the relevant files and folders are properly locked,
-         * and their details are updated.
-         *
-         * @return void This method does not return a value.
+         * @return void
          * @throws Caller
          * @throws InvalidCast
+         * @throws Exception
          */
         protected function uploadInfo(): void
         {
-            parent::uploadInfo();
-
-            if ($this->options['FileError'] == 0) {
-                $objFile = new Files();
-                $objFile->setFolderId($_SESSION['folderId']);
-                $objFile->setName(basename($this->options['FileName']));
-                $objFile->setPath($this->getRelativePath($this->options['FileName']));
-                $objFile->setType("file");
-                $objFile->setDescription(null);
-                $objFile->setExtension($this->getExtension($this->options['FileName']));
-                $objFile->setMimeType($this->getMimeType($this->options['FileName']));
-                $objFile->setSize($this->options['FileSize']);
-                $objFile->setMtime(filemtime($this->options['FileName']));
-                $objFile->setDimensions($this->getDimensions($this->options['FileName']));
-                $objFile->setWidth($this->getImageWidth($this->options['FileName']));
-                $objFile->setHeight($this->getImageHeight($this->options['FileName']));
-                $objFile->setLockedFile(1);
-                $objFile->setActivitiesLocked(1);
-                $objFile->save(true);
-
-                $objMiniGallery = new MiniGallery();
-                $objMiniGallery->setContentCoverMediaId($_SESSION['coverMediaId']);
-                $objMiniGallery->setFolderId($_SESSION['folderId']);
-                $objMiniGallery->setFileId($objFile->getId());
-                $objMiniGallery->setName(basename($this->options['FileName']));
-                $objMiniGallery->setPath($this->getRelativePath($this->options['FileName']));
-                $objMiniGallery->setStatus(1);
-                $objMiniGallery->setPostDate(QCubed\QDateTime::now());
-                $objMiniGallery->save();
+            if (($this->options['FileError'] ?? 0) != 0) {
+                $this->handleError('File upload contains an error state.', $this->options['FileName'] ?? null);
             }
+
+            if (empty($this->options['FileName']) || !is_file($this->options['FileName'])) {
+                $this->handleError("An uploaded file isn't found after upload.", $this->options['FileName'] ?? null);
+            }
+
+            $fullPath = $this->options['FileName'];
+            $extension = $this->getExtension($fullPath);
+            $mimeType = $this->getMimeType($fullPath);
+            $size = filesize($fullPath);
+            $mtime = filemtime($fullPath);
+            $dimensions = $this->getDimensions($fullPath);
+            $width = $this->getImageWidth($fullPath);
+            $height = $this->getImageHeight($fullPath);
+
+            $obj = new Files();
+            $obj->setFolderId($_SESSION['folderId']);
+            $obj->setName(basename($fullPath));
+            $obj->setType('file');
+            $obj->setPath($this->getRelativePath($fullPath));
+            $obj->setDescription(null);
+            $obj->setExtension($extension);
+            $obj->setMimeType($mimeType);
+            $obj->setSize($size);
+            $obj->setMtime($mtime);
+            $obj->setDimensions($dimensions);
+            $obj->setWidth($width);
+            $obj->setHeight($height);
+            $obj->setLockedFile(1);
+            $obj->setActivitiesLocked(1);
+            $obj->save(true);
+
+            $objMiniGallery = new MiniGallery();
+            $objMiniGallery->setContentCoverMediaId($_SESSION['coverMediaId']);
+            $objMiniGallery->setFolderId($_SESSION['folderId']);
+            $objMiniGallery->setFileId($obj->getId());
+            $objMiniGallery->setName(basename($fullPath));
+            $objMiniGallery->setPath($this->getRelativePath($fullPath));
+            $objMiniGallery->setStatus(1);
+            $objMiniGallery->setPostDate(QCubed\QDateTime::now());
+            $objMiniGallery->save();
 
             $objContentCoverMedia = ContentCoverMedia::loadById($_SESSION['coverMediaId']);
             $objContentCoverMedia->setPostUpdateDate(QDateTime::now());
@@ -83,78 +94,102 @@
                 $objFolder->setLockedFile(1);
                 $objFolder->save();
             }
+
+            print json_encode(array(
+                'filename' => basename($fullPath),
+                'path' => $this->getRelativePath($fullPath),
+                'extension' => $extension,
+                'type' => $this->options['FileType'],
+                'error' => 0,
+                'size' => $size,
+                'mtime' => $mtime,
+                'dimensions' => $dimensions
+            ), JSON_UNESCAPED_UNICODE);
         }
 
         /**
-         * Get width of an image from a given file path
+         * Get the width of an image file.
          *
-         * @param string $path Path to the image file
-         *
-         * @return int|string Width of the image in pixels, or 0 if the width could not be determined
+         * @param string $path
+         * @return int|string
          */
-        public static function getImageWidth(string $path): int|string
+        public static function getImageWidth(string $path): mixed
         {
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $ImageSize = getimagesize($path);
+            if (!is_file($path)) {
+                return '0';
+            }
 
-            if (in_array($ext, self::getImageExtensions())) {
-                return ($ImageSize[0] ?? '0');
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+            if ($ext === 'svg') {
+                return '0';
+            }
+
+            $imageSize = @getimagesize($path);
+
+            if ($imageSize && in_array($ext, self::getImageExtensions(), true)) {
+                return ($imageSize[0] ?? '0');
             }
 
             return '0';
         }
 
         /**
-         * Get the height of an image
+         * Get the height of an image file.
          *
-         * @param string $path The file path of the image
-         *
-         * @return int|string The height of the image in pixels, or 0 if the height could not be determined
+         * @param string $path
+         * @return int|string
          */
-        public static function getImageHeight(string $path): int|string
+        public static function getImageHeight(string $path): mixed
         {
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $ImageSize = getimagesize($path);
+            if (!is_file($path)) {
+                return '0';
+            }
 
-            if (in_array($ext, self::getImageExtensions())) {
-                return ($ImageSize[1] ?? '0');
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+            if ($ext === 'svg') {
+                return '0';
+            }
+
+            $imageSize = @getimagesize($path);
+
+            if ($imageSize && in_array($ext, self::getImageExtensions(), true)) {
+                return ($imageSize[1] ?? '0');
             }
 
             return '0';
         }
 
         /**
-         * Retrieves the list of supported image file extensions.
+         * Supported image extensions.
          *
-         * @return array An array of supported image file extensions.
+         * @return array
          */
         public static function getImageExtensions(): array
         {
-            return array('jpg', 'jpeg', 'bmp', 'png', 'webp', 'gif');
+            return array('jpg', 'jpeg', 'bmp', 'png', 'webp', 'gif', 'svg');
         }
     }
 
     try {
         $objHandler = new MiniGalleryFileHandler($options);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        error_log('Upload handler creation error: ' . $e->getMessage());
-        echo json_encode(['error' => 'Failed to start the file/s upload system.']);
+
+        error_log('Upload error: ' . $e->getMessage());
+        error_log($e->getTraceAsString());
+
+        $decoded = json_decode($e->getMessage(), true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            echo json_encode($decoded, JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode([
+                'error' => 'Failed to start the file/s upload system.',
+                'details' => $e->getMessage()
+            ], JSON_UNESCAPED_UNICODE);
+        }
+
         exit;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

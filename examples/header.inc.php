@@ -23,7 +23,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <?php if (isset($strPageTitle)){ ?><title><?php _p($strPageTitle); ?></title><?php } ?>
 
-    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700&subset=all" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700&subset=all" rel="stylesheet" type="text/css"/>
     <link href="<?= QCUBED_FONT_AWESOME_CSS ?>" rel="stylesheet"/>
     <link href="../assets/css/awesome-bootstrap-checkbox.css" rel="stylesheet"/>
     <link href="<?= QCUBED_BOOTSTRAP_CSS ?>" rel="stylesheet"/>
@@ -31,6 +31,8 @@
     <link href="../assets/css/qcubed.fileupload.css" rel="stylesheet" />
     <link href="../assets/css/vauu-table.css" rel="stylesheet" />
     <link href="../assets/css/toastr.css" rel="stylesheet" />
-    <script type="text/javascript" src="../assets/js/qcubed.minigallery-helper.js"></script>
+    <link href="../assets/css/gallery-hover-preview.css" rel="stylesheet" />
+    <script src="../assets/js/qcubed.minigallery-helper.js"></script>
+    <script src="../assets/js/gallery-hover-preview.js"></script>
 </head>
 <body>

@@ -79,10 +79,8 @@
          */
         protected function registerFiles(): void
         {
-            $this->AddJavascriptFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.galleryupload.js");
-            $this->addCssFile(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.uploadhandler.css");
-            //$this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL. "/css/style.css");
-            //$this->addCssFile(QCUBED_NESTEDSORTABLE_ASSETS_URL . "/css/vauu-table.css");
+            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/qcubed.galleryupload.js");
+            $this->addCssFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/qcubed.uploadhandler.css");
             $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         }
 

@@ -1,0 +1,19 @@
+.gallery-hover-preview {
+    position: fixed;
+    z-index: 99999;
+    display: none;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 18px rgba(0,0,0,.25);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.gallery-hover-preview img {
+    display: block;
+    max-width: 320px;
+    max-height: 320px;
+    width: auto;
+    height: auto;
+}

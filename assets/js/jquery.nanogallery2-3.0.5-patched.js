@@ -2147,7 +2147,7 @@
                     if (!execAsap)
                         func.apply(obj, args);
                     timeout = null;
-                };
+                }
 
                 if (timeout)
                     clearTimeout(timeout);
@@ -2191,7 +2191,7 @@
                 // delta = delay;
 
                 delta >= delay ? fn.call() : handle.value = requestAnimFrame(loop);
-            };
+            }
 
             handle.value = requestAnimFrame(loop);
             return handle;
@@ -3223,7 +3223,7 @@
             $newDiv.click(function() {
                 var cAlbumID = jQuery(this).data('albumID');
                 DisplayAlbum('-1', cAlbumID);
-                return;
+
             });
         }
 
@@ -3234,7 +3234,7 @@
             $newSep.click(function() {
                 var sepAlbumIdx=jQuery(this).data('albumIdx');
                 DisplayAlbum('-1', G.I[sepAlbumIdx].GetID());
-                return;
+
             });
         }
 
@@ -5153,7 +5153,7 @@
             $newDiv.data('index', GOMidx);
             item.$getElt('.nGY2GThumbnailImg').data('index', GOMidx);
 
-            return;
+
         }
 
 
@@ -5276,7 +5276,7 @@
                 ThumbnailOverInit(GOMidx);
             }
 
-            return ;
+
         }
 
 
@@ -5561,7 +5561,7 @@
                         G.GOM.thumbnails2Display.push({itm: item, d: delay});
                         // ThumbnailDisplayAnim2(item, delay);
                     }
-                    return;
+
                 }
                 else {
                     item.$elt.css({ opacity: 1 });
@@ -5975,7 +5975,7 @@
         }
 
         function ThumbnailHoverReInitAll() {
-            if( G.GOM.albumIdx == -1 ) { return; };
+            if( G.GOM.albumIdx == -1 ) { return; }
             var l = G.GOM.items.length;
             for( var i = 0; i < l ; i++ ) {
                 ThumbnailOverInit(i);
@@ -5986,7 +5986,7 @@
 
 
         function ThumbnailHover( GOMidx ) {
-            if( G.GOM.albumIdx == -1 || !G.galleryResizeEventEnabled ) { return; };
+            if( G.GOM.albumIdx == -1 || !G.galleryResizeEventEnabled ) { return; }
             if( G.GOM.slider.hostIdx == GOMidx ) {
                 // slider hosted on thumbnail -> no hover effect
                 return;
@@ -6020,7 +6020,7 @@
         }
 
         function ThumbnailHoverOutAll() {
-            if( G.GOM.albumIdx == -1 ) { return; };
+            if( G.GOM.albumIdx == -1 ) { return; }
             var l = G.GOM.items.length;
             for( var i = 0; i < l ; i++ ) {
                 if( G.GOM.items[i].inDisplayArea ) {
@@ -7805,7 +7805,7 @@
             jQuery('head').append('<style id="ngycs_'+G.baseEltID+'">'+s+'</style>');
             G.$E.base.addClass(galleryTheme);
 
-        };
+        }
 
         // ##### VIEWER COLOR SCHEME #####
         function SetViewerTheme( ) {
@@ -7858,7 +7858,7 @@
             s += s1 + '.nGY2Viewer .toolbar .label .description { color:' + cs.barDescriptionColor + '; }'+'\n';
             jQuery('head').append('<style>' + s + '</style>');
             G.VOM.$baseCont.addClass(G.VOM.viewerTheme);
-        };
+        }
 
 
 
@@ -9662,7 +9662,7 @@
 
             TriggerCustomEvent('lightboxNextImage');
             LightboxDisplay('nextImage', velocity);
-        };
+        }
 
         // Display previous image
         function DisplayPreviousMedia( velocity ) {
@@ -9675,7 +9675,7 @@
 
             TriggerCustomEvent('lightboxPreviousImage');
             LightboxDisplay( 'previousImage', velocity);
-        };
+        }
 
 
 
@@ -10209,7 +10209,7 @@
             };
 
             return scrollParent(node);
-        };
+        }
 
 
 
@@ -10420,7 +10420,7 @@
                         ev.srcEvent.preventDefault();  // cancel  mouseenter event
 
                         if( ev.pointerType == 'mouse') {
-                            if( GalleryClicked(ev.srcEvent) == 'exit' ) { return; }
+                            if( GalleryClicked(ev.srcEvent) == 'exit' ) {  }
                         }
                         else {
                             var r = GalleryEventRetrieveElementl(ev.srcEvent, false);
@@ -16990,7 +16990,7 @@
         // -----------
         // Initialize thumbnail sizes
         function Init() {
-            return;
+
         }
 
 

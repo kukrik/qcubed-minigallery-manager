@@ -6,7 +6,7 @@
     use GdImage;
 
     /**
-     * Class FileHandler
+     * Class VauuFileHandler
      *
      * Note: the "upload" folder must already exist in /project/assets/ and this folder has 777 permissions.
      *
@@ -45,7 +45,7 @@
      *
      * @property string $ImageResizeFunction Default 'imagecopyresampled'. Choose between 'imagecopyresampled' (smoother)
      *                                       and 'imagecopyresized' (faster). The difference is minimal, but you could use
-     *                                       imagecopyresized, for example, if you want faster resizing when not using image
+     *                                       imagecopyresized, for example if you want faster resizing when not using image
      *                                       resize cache.
      * @property boolean $ImageResizeSharpen Default true. Creates sharper (less blurry) preview images.
      * @property array $TempFolders Default '['thumbnail', 'medium', 'large']'. If you want to change the names of
@@ -123,6 +123,7 @@
          *                             - Other configuration options related to uploads.
          *
          * @return void
+         * @throws \Throwable
          * @throws Exception
          */
         public function __construct(?array $options = null)
@@ -162,7 +163,7 @@
                 6 => t('Missing a temporary folder'),
                 7 => t('Failed to write a file to disk'),
                 8 => t('A PHP extension stopped the file upload'),
-                //'post_max_size' => t('The uploaded file exceeds the post_max_size directive in php.ini'),
+                //'post_max_size' => t('The an uploaded file exceeds the post_max_size directive in php.ini'),
                 'max_file_size' => 'File is too big',
                 'min_file_size' => 'File is too small',
                 'accept_file_types' => t('Filetype not allowed'),
@@ -178,7 +179,9 @@
                 'could-not_write_output' => t('Failed to open the output stream'),
                 'could_not_read_input' => t('Failed to open the input stream'),
                 'failed_to_move_uploaded_file' => t('Failed to move an uploaded file'),
-                'file_not_found' => t('File not found')
+                'file_not_found' => t('File not found'),
+                'failed_to_create_image' => t('Failed to create GD image'),
+                'failed_to_load_image' => t('Failed to load image with GD'),
             );
 
             if ($options) {
@@ -228,41 +231,60 @@
          *
          * @return void
          * @throws Exception
+         * @throws \Throwable
          */
         public function handleFileUpload(): void
         {
             $this->chunkEnabled = $_REQUEST['chunkEnabled'] ?? "false";
 
-            $this->index = intval($_REQUEST['index']) ?? 0;
-            $this->chunk = intval($_REQUEST['chunk']) ?? 0;
-            $this->count = intval($_REQUEST['count']) ?? 0;
+            $this->index = isset($_REQUEST['index']) ? (int)$_REQUEST['index'] : 0;
+            $this->chunk = isset($_REQUEST['chunk']) ? (int)$_REQUEST['chunk'] : 0;
+            $this->count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 0;
 
-            $this->options['FileName'] = $this->options['RootPath'] . '/' . $_FILES["files"]["name"];
+            if (
+                !isset($_FILES["files"]) ||
+                !isset($_FILES["files"]["tmp_name"]) ||
+                !isset($_FILES["files"]["name"])
+            ) {
+                $this->handleError($this->getErrorMessage('file_not_found'));
+            }
+
+            $originalName = basename($_FILES["files"]["name"]);
+
+            $this->options['FileName'] = $this->options['RootPath'] . '/' . $originalName;
             $this->options['File'] = $_FILES["files"]["tmp_name"];
-            $this->options['FileType'] = $_FILES["files"]["type"];
-            $this->options['FileSize'] = $_FILES["files"]["size"];
-            $this->options['FileError'] = $_FILES["files"]["error"];
+            $this->options['FileType'] = $_FILES["files"]["type"] ?? null;
+            $this->options['FileSize'] = $_FILES["files"]["size"] ?? 0;
+            $this->options['FileError'] = $_FILES["files"]["error"] ?? 0;
 
-            // If DestinationPath is set
             if ($this->options['DestinationPath'] !== null) {
-                $this->options['FileName'] = $this->options['RootPath'] . $this->options['DestinationPath'] . '/' . basename($this->options['FileName']);
+                $this->options['FileName'] =
+                    rtrim($this->options['RootPath'], '/')
+                    . '/'
+                    . trim($this->options['DestinationPath'], '/')
+                    . '/'
+                    . $originalName;
             }
 
             if ($this->chunkEnabled === "false") {
-                // Check for duplicate filenames and increment if necessary
                 $newFileName = $this->checkDuplicateFile($this->options['FileName']);
 
-                // Make sure the new file name is received and then validate the file
                 if ($newFileName !== null) {
                     $this->options['FileName'] = $newFileName;
                 }
 
-                // Validate the file with the updated filename
-                if ($this->regularValidate($this->options['File'], $this->options['FileName'], $this->options['FileError'])) {
-                    // Upload a file with a new name
+                if ($this->regularValidate(
+                    $this->options['File'],
+                    $this->options['FileName'],
+                    $this->options['FileError']
+                )) {
                     $this->handleRegularUpload($this->options['File'], $this->options['FileName']);
                 }
             } else {
+                if ($this->count < 1 || $this->chunk < 1 || $this->chunk > $this->count) {
+                    $this->handleError($this->getErrorMessage('invalid_chunk_size'), $this->options['FileName']);
+                }
+
                 $this->handleChunkUpload($this->options['File'], $this->options['FileName']);
             }
         }
@@ -275,6 +297,7 @@
          * @param int $error Error code associated with the file upload process.
          *
          * @return bool|null Returns true if the file passes all validation checks, false otherwise.
+         * @throws \Exception
          */
         public function regularValidate(mixed $uploadedFile, string $fileName, int $error): ?bool
         {
@@ -367,9 +390,26 @@
          */
         protected function handleRegularUpload(string $uploadedFile, string $file): void
         {
-            move_uploaded_file($uploadedFile, $file);
+            if (!is_uploaded_file($uploadedFile)) {
+                $this->handleError($this->getErrorMessage('file_not_found'), $file);
+            }
 
-            clearstatcache();
+            $targetDir = dirname($file);
+            if (!is_dir($targetDir)) {
+                $this->handleError($this->getErrorMessage('failed_to_open_stream'), $file);
+            }
+
+            if (!move_uploaded_file($uploadedFile, $file)) {
+                $this->handleError($this->getErrorMessage('failed_to_move_uploaded_file'), $file);
+            }
+
+            clearstatcache(true, $file);
+
+            if (!is_file($file)) {
+                $this->handleError($this->getErrorMessage('file_not_found'), $file);
+            }
+
+            $this->options['FileSize'] = filesize($file);
 
             $this->resizeImageProcess($file);
             $this->uploadInfo();
@@ -386,56 +426,131 @@
          */
         protected function handleChunkUpload(string $uploadedFile, string $file): void
         {
-            $chunkFile = $this->options['ChunkPath'] . '/' . basename($file);
+            if (!is_uploaded_file($uploadedFile)) {
+                $this->handleError($this->getErrorMessage('file_not_found'), $file);
+            }
 
-            // Move the file to a temporary location
-            if (!move_uploaded_file($uploadedFile, $chunkFile . '.part' . $this->chunk)) {
+            if (!is_dir($this->options['ChunkPath'])) {
+                if (!mkdir($this->options['ChunkPath'], 0777, true) && !is_dir($this->options['ChunkPath'])) {
+                    $this->handleError($this->getErrorMessage('failed_to_open_stream'), $file);
+                }
+            }
+
+            $chunkFile = $this->options['ChunkPath'] . '/' . basename($file);
+            $partFile = $chunkFile . '.part' . $this->chunk;
+
+            // Salvesta käesolev chunk temp kausta
+            if (!move_uploaded_file($uploadedFile, $partFile)) {
                 $this->handleError($this->getErrorMessage('failed_to_move_uploaded_file'), $file);
                 return;
             }
 
-            clearstatcache();
+            clearstatcache(true, $partFile);
 
+            if (!is_file($partFile)) {
+                $this->handleError($this->getErrorMessage('file_not_found'), $partFile);
+            }
+
+            // Leia kõik olemasolevad part failid
             $filePath = $chunkFile . '.part*';
-            $fileParts = glob($filePath);
-            sort($fileParts, SORT_NATURAL);
-            $_SESSION['parts'] = $fileParts; // We keep the parts in the session
+            $fileParts = glob($filePath, GLOB_NOSORT);
 
-            // Merge chunks
+            if ($fileParts === false) {
+                $this->handleError($this->getErrorMessage('file_not_found'), $chunkFile);
+            }
+
+            sort($fileParts, SORT_NATURAL);
+            $_SESSION['parts'] = $fileParts;
+
+            // Kui kõik osad pole veel kohal, ära merge'i
+            if (count($fileParts) < $this->count) {
+                print json_encode(array(
+                    'filename' => basename($file),
+                    'size' => $this->options['FileSize'],
+                    'type' => $this->options['FileType'],
+                    'error' => null,
+                    'merged' => false,
+                    'chunk' => $this->chunk,
+                    'count' => $this->count
+                ));
+                return;
+            }
+
+            // Merge chunks backup-loogika järgi
             $finalFile = fopen($chunkFile, 'wb');
+            if ($finalFile === false) {
+                $this->handleError($this->getErrorMessage('could-not_write_output'), $chunkFile);
+            }
+
+            $this->counter = 0;
 
             foreach ($fileParts as $filePart) {
                 $chunk = file_get_contents($filePart);
-                fwrite($finalFile, $chunk);
+
+                if ($chunk === false) {
+                    fclose($finalFile);
+                    $this->handleError($this->getErrorMessage('could_not_read_input'), $filePart);
+                }
+
+                if (fwrite($finalFile, $chunk) === false) {
+                    fclose($finalFile);
+                    $this->handleError($this->getErrorMessage('could-not_write_output'), $chunkFile);
+                }
+
                 $this->counter++;
             }
 
             fclose($finalFile);
+            clearstatcache(true, $chunkFile);
 
-            // When all parts are received
+            // Kui kõik vajalikud osad on koos
             if ($this->count == $this->counter) {
-
-                $this->partFilesToDelete($_SESSION['parts']);
+                if (!is_file($chunkFile)) {
+                    $this->handleError($this->getErrorMessage('file_not_found'), $chunkFile);
+                }
 
                 // Final validation after merging files
-                if ($this->chunkValidate($finalFile, $chunkFile , 0, true)) {
-
-                    // If the filename already exists, check for duplicates
+                if ($this->chunkValidate($chunkFile, $chunkFile, 0, true)) {
                     if (!file_exists($file)) {
-                        rename($chunkFile, $file);
+                        if (!rename($chunkFile, $file)) {
+                            $this->handleError($this->getErrorMessage('failed_to_move_uploaded_file'), $file);
+                        }
+                        $this->options['FileName'] = $file;
                         $this->options['FileSize'] = filesize($file);
                     } else {
                         $newFileName = $this->checkDuplicateFile($file);
-                        rename($chunkFile, $newFileName);
+
+                        if ($newFileName === null) {
+                            $newFileName = $file;
+                        }
+
+                        if (!rename($chunkFile, $newFileName)) {
+                            $this->handleError($this->getErrorMessage('failed_to_move_uploaded_file'), $newFileName);
+                        }
+
                         $this->options['FileName'] = $newFileName;
                         $this->options['FileSize'] = filesize($newFileName);
                     }
 
+                    // Alles pärast edukat rename'i kustuta part failid
+                    $this->partFilesToDelete($_SESSION['parts']);
+
                     // Further processing
                     $this->resizeImageProcess($this->options['FileName']);
                     $this->uploadInfo();
+                    return;
                 }
             }
+
+            print json_encode(array(
+                'filename' => basename($file),
+                'size' => $this->options['FileSize'],
+                'type' => $this->options['FileType'],
+                'error' => null,
+                'merged' => false,
+                'chunk' => $this->chunk,
+                'count' => $this->count
+            ));
         }
 
         /**
@@ -465,6 +580,7 @@
          *
          * @return string|null Returns the original or newly generated filename if a duplicate is handled,
          *                     or null if the file is overwritten.
+         * @throws \Exception
          */
         protected function checkDuplicateFile(string $fileName): ?string
         {
@@ -581,7 +697,7 @@
                 IMAGETYPE_JPEG => imagecreatefromjpeg($path),
                 IMAGETYPE_PNG  => imagecreatefrompng($path),
                 IMAGETYPE_GIF  => imagecreatefromgif($path),
-                18             => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($path) : false, // IMAGETYPE_WEBP
+                IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($path) : false, // IMAGETYPE_WEBP || Täna lisasin selle, kas õige???
                 IMAGETYPE_BMP  => function_exists('imagecreatefrombmp') ? imagecreatefrombmp($path) : false,
                 default        => false,
             };
@@ -643,7 +759,6 @@
             $image = $this->imageCreateFrom($path, $size[2]);
             if ($image === false) {
                 $this->handleError($this->getErrorMessage('failed_to_load_image'), $path);
-                imagedestroy($newImage);
                 return;
             }
 
@@ -652,12 +767,8 @@
 
             if (!call_user_func($this->options['ImageResizeFunction'], $newImage, $image, 0, 0, 0, 0, $resizeWidth, $resizeHeight, $size[0], $size[1])) {
                 $this->handleError($this->getErrorMessage('failed_to_resize_image'), $path);
-                imagedestroy($image);
-                imagedestroy($newImage);
                 return;
             }
-
-            imagedestroy($image);
 
             if ($this->options['ImageResizeSharpen']) {
                 $this->sharpenImage($newImage);
@@ -668,27 +779,29 @@
 
             switch ($size[2]) {
                 case IMAGETYPE_JPEG:
-                    // For JPEG, only the ImageResizeQuality value is used (default 90)
                     imagejpeg($newImage, $newPath, $quality ?? 90);
                     break;
+
+                case IMAGETYPE_WEBP:
+                    if (!function_exists('imagewebp')) {
+                        throw new Exception('WEBP support is missing in GD');
+                    }
+                    imagewebp($newImage, $newPath, $quality ?? 90);
+                    break;
+
                 case IMAGETYPE_GIF:
-                    // You cannot provide parameters for saving a GIF
                     imagegif($newImage, $newPath);
                     break;
+
                 case IMAGETYPE_PNG:
-                    // PNG compression level (0–9) is taken only from PngLevel, regardless of JPEG quality
                     $pngLevel = isset($this->options['PngLevel']) ? (int)$this->options['PngLevel'] : 6;
-                    // Make sure the value is within the allowed range
                     $pngLevel = min(max($pngLevel, 0), 9);
                     imagepng($newImage, $newPath, $pngLevel);
                     break;
+
                 default:
-                    imagedestroy($newImage);
                     throw new Exception(t("Unable to deal with an image type"));
             }
-
-            // destroy image
-            imagedestroy($newImage);
         }
 
         /**
@@ -718,29 +831,18 @@
          * @param string|null $file The path to the file associated with the error, if available.
          *
          * @return void
+         * @throws \Exception
          */
         public function handleError(string $errorMessage, ?string $file = null): void
         {
-            $json['filename'] = basename($file);
-            $json['size'] = $this->options['FileSize'];
-            $json['type'] = $this->options['FileType'];
-            $json['error'] = $errorMessage;
-            print json_encode($json);
+            $json = array(
+                'filename' => $file ? basename($file) : null,
+                'size' => $this->options['FileSize'] ?? 0,
+                'type' => $this->options['FileType'] ?? null,
+                'error' => $errorMessage
+            );
 
-            // Check and remove temporary files
-
-            // If there is an error, delete the final file and all temporary parts
-            if (!empty($this->options['ChunkPath']) && $file) {
-                $chunkFile = $this->options['ChunkPath'] . '/' . basename($file);
-
-                if ($errorMessage && file_exists($chunkFile)) {
-                    unlink($chunkFile);
-                }
-            }
-
-            // NB! If you want testability, don't use exit here,
-            // just throw an Exception or return some value - this is already need-based.
-            //exit;
+            throw new Exception(json_encode($json, JSON_UNESCAPED_UNICODE));
         }
 
         /**

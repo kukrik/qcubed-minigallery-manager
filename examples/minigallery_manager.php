@@ -98,7 +98,7 @@
             ////////////////////////////////////////////////////////
 
             $this->objMiniGallery = new Q\Plugin\MiniGallery($this);
-            $this->objMiniGallery->PopupUrl = dirname(QCUBED_QCUBED_MINIGALLERY_MANAGER_ASSETS_URL) . "/examples/mini_gallery_page.php?id=" . $this->objArticle->getId() . "&group=" . $this->intGroup;
+            $this->objMiniGallery->PopupUrl = dirname(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL) . "/examples/mini_gallery_page.php?id=" . $this->objArticle->getId() . "&group=" . $this->intGroup;
             $this->objMiniGallery->EmptyImagesAlt = t("Choose a mini gallery");
 
             if (!empty($this->objArticle->getMediaTypeId())) {

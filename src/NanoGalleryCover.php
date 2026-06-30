@@ -45,8 +45,8 @@
         {
             $this->AddCssFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/nanogallery2/src/css/nanogallery2.css");
             $this->AddCssFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/css/nano-gallery-cover.css");
-            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/jquery.nanogallery2-3.0.5-patched.js");
-            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/nano-gallery-cover.js");
+            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/jquery.nanogallery2-3.0.5-patched.min.js");
+            $this->AddJavascriptFile(QCUBED_MINIGALLERY_MANAGER_ASSETS_URL . "/js/nano-gallery-cover.min.js");
             $this->AddCssFile(QCUBED_BOOTSTRAP_CSS); // make sure they know
         }
     }

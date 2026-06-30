@@ -2097,7 +2097,7 @@
     // author: underscore.js - http://underscorejs.org/docs/underscore.html
     // Returns a function, that, when invoked, will only be triggered at most once during a given window of time.
     // Normally, the throttled function will run as much as it can, without ever going more than once per wait duration;
-    // but if you’d like to disable the execution on the leading edge, pass {leading: false}.
+    // but if youï¿½d like to disable the execution on the leading edge, pass {leading: false}.
     // To disable execution on the trailing edge, ditto.
     var throttle = function(func, wait, options) {
       var context, args, result;
@@ -2143,7 +2143,7 @@
               if (!execAsap)
                   func.apply(obj, args);
               timeout = null; 
-          };
+          }
    
           if (timeout)
               clearTimeout(timeout);
@@ -2187,7 +2187,7 @@
           // delta = delay;
   
         delta >= delay ? fn.call() : handle.value = requestAnimFrame(loop);
-      };
+      }
       
       handle.value = requestAnimFrame(loop);
       return handle;
@@ -3219,7 +3219,7 @@
       $newDiv.click(function() {
         var cAlbumID = jQuery(this).data('albumID');
         DisplayAlbum('-1', cAlbumID);
-        return;
+
       });
     }
 
@@ -3230,7 +3230,7 @@
       $newSep.click(function() {
         var sepAlbumIdx=jQuery(this).data('albumIdx');
         DisplayAlbum('-1', G.I[sepAlbumIdx].GetID());
-        return;
+
       });
     }
 
@@ -5149,7 +5149,7 @@
       $newDiv.data('index', GOMidx);
       item.$getElt('.nGY2GThumbnailImg').data('index', GOMidx);
       
-      return;
+
     }
 
     
@@ -5272,7 +5272,7 @@
         ThumbnailOverInit(GOMidx);
       }
       
-      return ;
+
     }
 
     
@@ -5557,7 +5557,7 @@
             G.GOM.thumbnails2Display.push({itm: item, d: delay});
             // ThumbnailDisplayAnim2(item, delay);
           }
-          return;
+
         }
         else {
           item.$elt.css({ opacity: 1 });
@@ -5971,7 +5971,7 @@
     }
 
     function ThumbnailHoverReInitAll() {
-      if( G.GOM.albumIdx == -1 ) { return; };
+      if( G.GOM.albumIdx == -1 ) { return; }
       var l = G.GOM.items.length;
       for( var i = 0; i < l ; i++ ) {
         ThumbnailOverInit(i);
@@ -5982,7 +5982,7 @@
 
 
     function ThumbnailHover( GOMidx ) {
-      if( G.GOM.albumIdx == -1 || !G.galleryResizeEventEnabled ) { return; };
+      if( G.GOM.albumIdx == -1 || !G.galleryResizeEventEnabled ) { return; }
       if( G.GOM.slider.hostIdx == GOMidx ) {
         // slider hosted on thumbnail -> no hover effect
         return;
@@ -6016,7 +6016,7 @@
     }
 
     function ThumbnailHoverOutAll() {
-      if( G.GOM.albumIdx == -1 ) { return; };
+      if( G.GOM.albumIdx == -1 ) { return; }
       var l = G.GOM.items.length;
       for( var i = 0; i < l ; i++ ) {
         if( G.GOM.items[i].inDisplayArea ) {
@@ -7801,7 +7801,7 @@
       jQuery('head').append('<style id="ngycs_'+G.baseEltID+'">'+s+'</style>');
       G.$E.base.addClass(galleryTheme);
 
-    };
+    }
     
     // ##### VIEWER COLOR SCHEME #####
     function SetViewerTheme( ) {
@@ -7854,7 +7854,7 @@
       s += s1 + '.nGY2Viewer .toolbar .label .description { color:' + cs.barDescriptionColor + '; }'+'\n';
       jQuery('head').append('<style>' + s + '</style>');
       G.VOM.$baseCont.addClass(G.VOM.viewerTheme);
-    };
+    }
 
     
     
@@ -7888,7 +7888,7 @@
         };
       }
 
-      // requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+      // requestAnimationFrame polyfill by Erik Mï¿½ller. fixes from Paul Irish and Tino Zijdel
       // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
       // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
       // MIT license
@@ -8396,7 +8396,7 @@
       var vimg = new VImg(ngy2ItemIdx);
       G.VOM.items.push(vimg);
       items.push(G.I[ngy2ItemIdx]);
-      //TODO -> danger? -> pourquoi reconstruire la liste si déjà ouvert (back/forward)     
+      //TODO -> danger? -> pourquoi reconstruire la liste si dï¿½jï¿½ ouvert (back/forward)     
       var l = G.I.length;
       for( let idx = ngy2ItemIdx+1; idx < l ; idx++) {
         let item = G.I[idx];
@@ -9651,7 +9651,7 @@
       
       TriggerCustomEvent('lightboxNextImage');
       LightboxDisplay('nextImage', velocity);
-    };
+    }
     
     // Display previous image
     function DisplayPreviousMedia( velocity ) {
@@ -9664,7 +9664,7 @@
       
       TriggerCustomEvent('lightboxPreviousImage');
       LightboxDisplay( 'previousImage', velocity);
-    };
+    }
 
 
 
@@ -10198,7 +10198,7 @@
 			};
 
 			return scrollParent(node);
-		};
+		}
 
 
 
@@ -10409,7 +10409,7 @@
             ev.srcEvent.preventDefault();  // cancel  mouseenter event
 
             if( ev.pointerType == 'mouse') {
-              if( GalleryClicked(ev.srcEvent) == 'exit' ) { return; }
+              if( GalleryClicked(ev.srcEvent) == 'exit' ) {  }
             }
             else {
               var r = GalleryEventRetrieveElementl(ev.srcEvent, false);

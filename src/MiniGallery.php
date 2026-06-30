@@ -116,12 +116,14 @@
 
                 $strHtml .= _nl(_indent('<div class="empty-multi-images-wrapper">', 1));
 
-                $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
+                //$strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
             } else {
                 $strHtml .= _nl(_indent('<div class="empty-multi-images-wrapper hidden">', 1));
 
-                $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
+                //$strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
             }
+
+            $strHtml .= _nl(_indent('<div class="choose-mini-gallery">', 2));
 
             if ($this->strEmptyImagesAlt) {
                 $strHtml .= _nl(_indent('<img src="' . $this->strEmptyImagesPath . '" alt="' . $this->strEmptyImagesAlt . '" class="image img-responsive">', 3));
@@ -130,6 +132,7 @@
             }
 
             $strHtml .= _nl(_indent('</div>', 2));
+
 
             $strHtml .= _nl(_indent('<div class="incident-wrapper' . $strHiddenClass . '" data-id="' . $strCoverMediaId . '" data-event="delete">', 2));
             $strHtml .= _nl(_indent('<div class="incident-overlay" data-id="' . $strCoverMediaId . '">',3));
